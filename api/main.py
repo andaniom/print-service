@@ -6,8 +6,6 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from typing import List
 
-from api.database import SessionLocal, engine
-from api.schemas import MappingPrinter
 from services.queue_service import print_queue
 from services.file_service import save_file, validate_file
 from services.printer_service import initialize_printer
@@ -16,6 +14,7 @@ from repo.printer_repo import get_printers_from_db
 from utils.usb_util import list_usb_printers
 from logger import logger
 from models import Base
+from database import SessionLocal, engine
 
 Base.metadata.create_all(bind=engine)
 
