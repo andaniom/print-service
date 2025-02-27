@@ -63,7 +63,7 @@ def print_pdf(pdf_file, label):
         # Convert PDF to images
         images = convert_from_path(pdf_file, fmt="jpeg")
         mapping = get_mapping_printer_by_label(label)
-        printer = Usb(0x04b8, 0x0202, 0, profile="TM-T88III")
+        printer = Usb(mapping[3], mapping[4])
 
         # Print each image
         for image in images:
@@ -95,6 +95,11 @@ def save_mapping_printers(printers = []):
     ]
     save_mapping_printers_to_db(printers)
     return JSONResponse(content={"message": "Printers saved successfully"})
+
+@app.get("/printer-device")
+def get_printer_device():
+    printers = list_usb_printers()
+    return JSONResponse(content={"printers": printers})
 
 @app.get("/printers")
 def get_printers():
