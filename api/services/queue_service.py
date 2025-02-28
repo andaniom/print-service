@@ -3,7 +3,7 @@ import queue
 import threading
 
 from api.logger import logger
-from api.services.printer_service import print_pdf, print_image
+from api.services.printer_service import print_image
 from api.utils.pdf_util import convert_pdf_to_images
 
 print_queue = queue.Queue()

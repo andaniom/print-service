@@ -4,18 +4,16 @@ import time
 from fastapi import FastAPI, File, UploadFile, HTTPException, Depends, Form
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
-from typing import List
 
-from services.queue_service import print_queue
-from services.file_service import save_file, validate_file
-from services.printer_service import initialize_printer
-from repo.mapping_printer_repo import get_mapping_printers_from_db, save_mapping_printers_to_db
-from repo.printer_repo import get_printers_from_db
-from utils.usb_util import list_usb_printers
-from logger import logger
-from models import Base
-from database import SessionLocal, engine
-
+from api.database import SessionLocal, engine, Base
+from api.logger import logger
+from api.repo.mapping_printer import get_mapping_printers_from_db, save_mapping_printers_to_db
+from api.repo.printer import get_printers_from_db
+from api.schemas import MappingPrinter
+from api.services.file_service import save_file
+from api.services.printer_service import initialize_printer
+from api.services.queue_service import print_queue
+from api.utils.usb_util import list_usb_printers
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
@@ -58,7 +56,6 @@ def select_printer(vendor_id: str, product_id: str):
         return JSONResponse(content={"message": "Printer selected successfully"})
     else:
         raise HTTPException(status_code=400, detail="Failed to select printer")
-
 
 @app.post("/print_eticket")
 async def add_to_queue(file: UploadFile = File(...), metadata: str = Form(...)):
