@@ -1,3 +1,7 @@
+import subprocess
+
+import threading
+
 import tkinter as tk
 from tkinter import filedialog, messagebox
 import requests
@@ -18,6 +22,29 @@ class SystemTrayApp:
         self.create_widgets()
 
     def create_widgets(self):
+        # Input port and hostname
+        self.service_frame = tk.LabelFrame(self.root, text="Service Setting", padx=10, pady=10)
+        self.service_frame.pack(fill=tk.X, padx=10, pady=5)
+
+        self.input_frame = tk.Frame(self.service_frame)
+        self.input_frame.pack(fill=tk.X)
+        self.hostname_label = tk.Label(self.input_frame, text="Hostname    ")
+        self.hostname_label.pack(side=tk.LEFT)
+        self.hostname_entry = tk.Entry(self.input_frame, width=20)
+        self.hostname_entry.insert(0, "localhost")
+        self.hostname_entry.pack(side=tk.RIGHT, fill=tk.X, expand=True)
+
+        self.port_frame = tk.Frame(self.service_frame)
+        self.port_frame.pack(fill=tk.X)
+        self.port_label = tk.Label(self.port_frame, text="Port              ")
+        self.port_label.pack(side=tk.LEFT)
+        self.port_entry = tk.Entry(self.port_frame, width=20)
+        self.port_entry.insert(0, "2212")
+        self.port_entry.pack(side=tk.RIGHT, fill=tk.X, expand=True)
+
+        # Add Start Service
+        self.add_pdf_button = tk.Button(self.service_frame, text="Start Service", command=self.start_backend)
+        self.add_pdf_button.pack(pady=10)
         # Printer selection
         self.printer_frame = tk.LabelFrame(self.root, text="Select Printer", padx=10, pady=10)
         self.printer_frame.pack(fill=tk.X, padx=10, pady=5)
@@ -137,6 +164,17 @@ class SystemTrayApp:
         """Stop the system tray icon and show the window."""
         icon.stop()
         self.root.after(0, self.root.deiconify)
+
+    def start_backend(self, host = "0.0.0.0", port = "2212"):
+        """
+        Starts the backend server.
+
+        Args:
+            host (str): The host to bind to. Defaults to "0.0.0.0".
+            port (str): The port to bind to. Defaults to "2212".
+        """
+        backend_thread = threading.Thread(target=subprocess.run(["uvicorn", "api.app:app", "--host", host, "--port", port]), daemon=True)
+        backend_thread.start()
 
 
 def start_frontend():

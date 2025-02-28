@@ -1,3 +1,9 @@
+import logging
+
+from pathlib import Path
+
+import subprocess
+
 import os
 
 from escpos.printer import Usb
@@ -40,13 +46,61 @@ def print_image(image, label):
 
         if printer is None:
             raise Exception("Printer not found")
+        printer.open()
 
-        printer.image(image)
-        printer.text("\n")
+        # printer.image(image)
+        # printer.text("\n")
+        printer.text("Hello, TSC TTP 244 Pro!\n")
+        printer.close()
 
-        printer.cut()
+
+        # printer.cut()
         logger.info(f"Printed: {label}")
     except Exception as e:
         logger.error(f"Failed to print {label}: {e}")
     # finally:
     #     os.remove(pdf_file)
+
+
+def print_pdf(pdf_file: str, page_number: int, printer_label: str, win32api=None):
+    # Validate input
+    mapping = get_mapping_printer_by_label(printer_label)
+    printer_name = mapping[1]
+    pdf_path = Path(pdf_file)
+    if not pdf_path.exists():
+        raise FileNotFoundError(f"The file {pdf_file} does not exist.")
+
+    if not isinstance(page_number, int) or page_number < 1:
+        raise ValueError("Page number must be a positive integer.")
+
+    if os.name == 'posix':  # Linux/Mac
+        try:
+            # Use 'lp' command if available
+            command = [
+                "lp",  # Command to print
+                "-o", f"page-ranges={page_number} queue={printer_name}",  # Specify the page range
+                pdf_file  # Specify the PDF file to print
+            ]
+
+            # Log the command being executed
+            logging.info(f"Executing command: {' '.join(command)}")
+
+            # Run the command
+            subprocess.run(command, check=True)
+        except Exception as e:
+            raise Exception(f"An error occurred while printing: {e}")
+    elif os.name == 'nt':  # Windows
+        try:
+            # Execute the ShellExecute command to print the PDF
+            # /d: option specifies the printer name
+            # /p option specifies the page number
+            # "." specifies the working directory
+            # 0 specifies the showCmd parameter
+            print_command = f'/d:"{printer_name}" /p {page_number}'
+
+            # Execute the print command
+            win32api.ShellExecute(0, "print", pdf_file, print_command, ".", 0)
+        except Exception as e:
+            raise Exception(f"An error occurred while printing: {e}")
+    else:
+        raise Exception("Unsupported operating system")
