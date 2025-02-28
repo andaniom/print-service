@@ -62,7 +62,7 @@ def print_image(image, label):
     #     os.remove(pdf_file)
 
 
-def print_pdf(pdf_file: str, page_number: int, printer_label: str, win32api=None):
+def print_pdf(pdf_file: str, page_number: int, printer_label: str):
     # Validate input
     mapping = get_mapping_printer_by_label(printer_label)
     printer_name = mapping[1]
@@ -99,6 +99,7 @@ def print_pdf(pdf_file: str, page_number: int, printer_label: str, win32api=None
             print_command = f'/d:"{printer_name}" /p {page_number}'
 
             # Execute the print command
+            import win32api
             win32api.ShellExecute(0, "print", pdf_file, print_command, ".", 0)
         except Exception as e:
             raise Exception(f"An error occurred while printing: {e}")
