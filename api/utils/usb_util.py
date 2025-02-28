@@ -13,6 +13,7 @@ def list_usb_printers():
             product_id = device.idProduct
             manufacturer = usb.util.get_string(device, device.iManufacturer)
             product = usb.util.get_string(device, device.iProduct)
+
             printers.append({
                 "vendor_id": vendor_id,
                 "product_id": product_id,
