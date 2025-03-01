@@ -19,8 +19,8 @@ def process_queue():
                 data = metadata_json['data']
                 for item in data:
                     printer_label = item['printer']
-                    print_image(images[item['page'] - 1], printer_label)
-                    # print_pdf(pdf_file, item['page'], printer_label)
+                    # print_image(images[item['page'] - 1], printer_label)
+                    print_pdf(pdf_file, item['page'], printer_label)
             except Exception as e:
                 logger.error(f"Failed to print {pdf_file}: {e}")
             # finally:

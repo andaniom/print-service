@@ -5,3 +5,4 @@ pydantic
 escpos
 pdf2image
 python-dotenv
+python-multipart

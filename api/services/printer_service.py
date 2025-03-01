@@ -1,11 +1,10 @@
+import subprocess
 import time
 
 import logging
 import serial
 
 from pathlib import Path
-
-import subprocess
 
 import os
 
@@ -99,11 +98,22 @@ def print_pdf(pdf_file: str, page_number: int, printer_label: str):
             # /p option specifies the page number
             # "." specifies the working directory
             # 0 specifies the showCmd parameter
-            print_command = f'/d:"{printer_name}" /p {page_number}'
+            # Execute the print command with SumatraPDF
+            sumatra_pdf_path = str(Path(__file__).parent / "print.exe")
+            if not os.path.exists(sumatra_pdf_path):
+                raise FileNotFoundError(f"SumatraPDF path not found: {sumatra_pdf_path}")
+            command = [
+                sumatra_pdf_path,
+                "-print-to", printer_name,
+                "-page", str(page_number),
+                pdf_file
+            ]
 
-            # Execute the print command
-            import win32api
-            win32api.ShellExecute(0, "print", pdf_file, print_command, ".", 0)
+            # Log the command being executed
+            logging.info(f"Executing command: {' '.join(command)}")
+
+            # Run the command
+            subprocess.run(command, check=True)
         except Exception as e:
             raise Exception(f"An error occurred while printing: {e}")
     else:
