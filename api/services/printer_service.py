@@ -1,4 +1,7 @@
+import time
+
 import logging
+import serial
 
 from pathlib import Path
 
@@ -105,3 +108,38 @@ def print_pdf(pdf_file: str, page_number: int, printer_label: str):
             raise Exception(f"An error occurred while printing: {e}")
     else:
         raise Exception("Unsupported operating system")
+
+def print_image_to_printer(image, printer_port):
+    # Configure the serial connection
+    printer = serial.Serial(port=printer_port, baudrate=9600, timeout=1)
+
+    # Save the image temporarily
+    temp_image_path = "temp_image.bmp"
+    image.save(temp_image_path, "BMP")
+
+    # TSPL commands to print the image
+    tspl_commands = f"""
+    SIZE 50 mm, 30 mm
+    GAP 0 mm, 0 mm
+    CLS
+    BITMAP 0,0,"{temp_image_path}"
+    PRINT 1
+    """
+
+    try:
+        # Open the serial port
+        printer.open()
+        time.sleep(2)  # Wait for the printer to initialize
+
+        # Send the TSPL commands to the printer
+        printer.write(tspl_commands.encode('utf-8'))
+
+        print("Image sent to printer.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+    finally:
+        # Close the serial connection
+        printer.close()
+        # Remove the temporary image file
+        if os.path.exists(temp_image_path):
+            os.remove(temp_image_path)
