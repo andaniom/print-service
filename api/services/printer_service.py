@@ -86,7 +86,9 @@ def print_pdf(pdf_file: str, page_number: int, printer_label: str):
             raise Exception(f"An error occurred while printing: {e}")
     elif os.name == 'nt':  # Windows
         try:
+            logging.info("print: windows")
             exec_path = get_resource_path("print.exe")
+            logging.info(f"path exe: {exec_path}")
 
             command = [exec_path, '-print-to', printer_name, pdf_path]
             if page_number:
