@@ -32,6 +32,7 @@ class SystemTrayApp:
         self.name_entry = None
         self.id_entry = None
         self.submit_button = None
+        self.cancel_button = None
 
         self.create_widgets()
         self.refresh_list()
@@ -129,9 +130,15 @@ class SystemTrayApp:
         self.label_entry = tk.Entry(self.add_frame)
         self.label_entry.grid(row=2, column=1, padx=5, pady=5)
 
-        # Add Button
-        self.submit_button = tk.Button(self.add_frame, text="Add Printer", command=self.submit_printer)
-        self.submit_button.grid(row=3, column=0, columnspan=2, pady=10)
+        # Buttons
+        button_frame = tk.Frame(self.add_frame)
+        button_frame.grid(row=3, column=1, columnspan=2, pady=5)
+
+        self.cancel_button = tk.Button(button_frame, text="Cancel", command=self.clear_form)
+        self.cancel_button.pack(side=tk.LEFT)
+
+        self.submit_button = tk.Button(button_frame, text="Add Printer", command=self.submit_printer)
+        self.submit_button.pack(side=tk.LEFT, padx=5)
 
     def submit_printer(self):
         if self.update_device:
@@ -268,17 +275,27 @@ class SystemTrayApp:
         # Place the entry widget in the correct position
         entry_edit.place(x=event.x, y=event.y, anchor="w")
 
+    def clear_form(self):
+        self.id_entry.config(state="normal")
+        self.submit_button.config(text="Add Printer")
+        self.add_frame.config(text="New Printer")
+        self.update_device = False
+        self.id_entry.delete(0, tk.END)
+        self.name_entry.delete(0, tk.END)
+        self.label_entry.delete(0, tk.END)
+
     def edit_row(self, row_id):
         """Edit a row in the Treeview."""
         current_values = list(self.tree.item(row_id, "values"))
         id = current_values[0]  # ID is the first column
         name = current_values[1]
         label = current_values[2]
+        self.clear_form()
         self.update_device = True
         self.id_entry.insert(0, id)
-        self.id_entry.configure(state="readonly")
         self.name_entry.insert(0, name)
         self.label_entry.insert(0, label)
+        self.id_entry.configure(state="readonly")
         self.submit_button.config(text="Update Printer")
         self.add_frame.config(text="Update Printer")
 
