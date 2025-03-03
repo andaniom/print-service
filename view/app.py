@@ -52,7 +52,7 @@ class SystemTrayApp:
         self.service_button = tk.Button(self.service_frame, text="Start Service", command=self.toggle_service)
         self.service_button.grid(row=2, column=0, columnspan=2, pady=10)
 
-        self.printer_frame = tk.LabelFrame(self.root, text="Select Printer", padx=10, pady=10)
+        self.printer_frame = tk.LabelFrame(self.root, text="List Printer", padx=10, pady=10)
         self.printer_frame.pack(fill=tk.X, padx=10, pady=5)
         self.create_editable_table()
         self.create_add_printer_form()
@@ -72,10 +72,9 @@ class SystemTrayApp:
 
     def create_editable_table(self):
         """Create an editable table using ttk.Treeview."""
-        self.tree = ttk.Treeview(self.printer_frame, columns=("ID", "Name", "Label"), show="headings")
-        self.tree.heading("ID", text="ID")
-        self.tree.heading("Name", text="Name")
-        self.tree.heading("Label", text="Label")
+        self.tree = ttk.Treeview(self.printer_frame, columns=("Printer Name", "Printer Label"), show="headings")
+        self.tree.heading("Printer Name", text="Printer Name")
+        self.tree.heading("Printer Label", text="Printer Label")
         self.tree.pack(fill=tk.X, padx=10, pady=5)
 
         # Insert data into the Treeview
@@ -89,7 +88,7 @@ class SystemTrayApp:
 
         # Insert the latest data
         for device in self.list_device:
-            self.tree.insert("", "end", values=(device["id"], device["name"], device["label"]))
+            self.tree.insert("", "end", values=(device["name"], device["label"]))
 
         self.tree.bind("<Double-1>", self.on_double_click)
 
@@ -97,11 +96,6 @@ class SystemTrayApp:
         """Create a form to add a new printer."""
         add_frame = tk.LabelFrame(self.root, text="Add New Printer", padx=10, pady=10)
         add_frame.pack(fill=tk.X, padx=10, pady=5)
-
-        # ID Field
-        tk.Label(add_frame, text="ID:").grid(row=0, column=0, padx=5, pady=5)
-        self.id_entry = tk.Entry(add_frame)
-        self.id_entry.grid(row=0, column=1, padx=5, pady=5)
 
         # Name Field
         tk.Label(add_frame, text="Name:").grid(row=1, column=0, padx=5, pady=5)
@@ -119,18 +113,10 @@ class SystemTrayApp:
 
     def add_printer(self):
         """Add a new printer to the database and update the Treeview."""
-        id = self.id_entry.get().strip()
         name = self.name_entry.get().strip()
         label = self.label_entry.get().strip()
 
-        if not id or not name or not label:
-            messagebox.showwarning("Input Error", "Please fill in all fields.")
-            return
-
-        # Check if the ID, Name, or Label already exists
-        if self.is_id_exists(id):
-            messagebox.showwarning("Duplicate ID", "A printer with this ID already exists.")
-            return
+        # Check if the Name, or Label already exists
         if self.is_name_exists(name):
             messagebox.showwarning("Duplicate Name", "A printer with this Name already exists.")
             return
@@ -142,7 +128,7 @@ class SystemTrayApp:
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         try:
-            cursor.execute("INSERT INTO mapping_printer (id, name, label) VALUES (?, ?, ?)", (id, name, label))
+            cursor.execute("INSERT INTO mapping_printer (name, label) VALUES (?, ?)", (name, label))
             conn.commit()
         except sqlite3.IntegrityError as e:
             messagebox.showwarning("Database Error", str(e))
@@ -155,7 +141,6 @@ class SystemTrayApp:
         self.update_treeview()
 
         # Clear the form fields
-        self.id_entry.delete(0, tk.END)
         self.name_entry.delete(0, tk.END)
         self.label_entry.delete(0, tk.END)
 
