@@ -90,9 +90,20 @@ def print_pdf(pdf_file: str, page_number: int, printer_label: str):
             exec_path = get_resource_path("print.exe")
             logging.info(f"path exe: {exec_path}")
 
-            command = [exec_path, '-print-to', printer_name, pdf_path]
-            if page_number:
-                command.extend(['-print-settings', f'page={page_number}'])
+            command = [
+                exec_path,
+                "-dBATCH",
+                "-dNOPAUSE",
+                "-sDEVICE=mswinpr2",
+                f"-sOutputFile=%printer%{printer_name}",
+                f"-dFirstPage={page_number}",
+                f"-dLastPage={page_number}",
+                pdf_file
+            ]
+
+            # command = [exec_path, '-print-to', printer_name, pdf_file]
+            # if page_number:
+            #     command.extend(['-print-settings', f'page={page_number}'])
 
             # Log the command being executed
             logging.info(f"Executing command: {' '.join(command)}")
