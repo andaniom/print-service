@@ -433,7 +433,7 @@ class SystemTrayApp:
                 import os
                 project_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
                 self.backend_process = subprocess.Popen(
-                    ["./backend_server.exe", "--host", host, "--port", port],  # Pass host and port
+                    ["./api.exe", "--host", host, "--port", port],  # Pass host and port
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
                 )
