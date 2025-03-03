@@ -90,7 +90,12 @@ def print_pdf(pdf_file: str, page_number: int, printer_label: str):
             exec_path = get_resource_path("print.exe")
             logging.info(f"path exe: {exec_path}")
 
-            command = [exec_path, '-print-to', printer_name, '-print-settings', f'page {page_number}, noscale, simplex', pdf_file]
+            command = [
+                exec_path,
+                '-print-to', printer_name,
+                '-print-settings', f'page {page_number}, noscale, simplex',
+                pdf_file
+            ]
 
             # Log the command being executed
             logging.info(f"Executing command: {' '.join(command)}")
