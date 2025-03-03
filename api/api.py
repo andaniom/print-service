@@ -95,4 +95,12 @@ if __name__ == "__main__":
     import uvicorn
     import multiprocessing
     multiprocessing.freeze_support()  # For Windows support
-    uvicorn.run(app, host="0.0.0.0", port=2212, reload=False, workers=1)
+
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--host", default="0.0.0.0")
+    parser.add_argument("--port", type=int, default=2212)
+    args = parser.parse_args()
+
+    uvicorn.run(app, host=args.host, port=args.port, reload=False, workers=1)
