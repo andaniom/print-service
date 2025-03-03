@@ -8,6 +8,7 @@ from tkinter import ttk
 import pystray
 from PIL import Image
 
+
 class SystemTrayApp:
 
     def __init__(self, root):
@@ -19,16 +20,17 @@ class SystemTrayApp:
         self.hostname_entry = None
         self.hostname_label = None
         self.root = root
+        self.root.iconbitmap("app.ico")
         self.root.configure(bg="#FFFFFF")
         self.root.title("System Print")
         self.root.geometry('1000x650')
         self.root.protocol('WM_DELETE_WINDOW', self.minimize_to_tray)
-        self.base_url = "http://localhost:8002"
         self.service_status = False
         self.backend_process = None
 
         self.create_widgets()
         self.refresh_list()
+        self.refresh_status()
 
     def create_widgets(self):
         # Input port and hostname
@@ -60,7 +62,8 @@ class SystemTrayApp:
         """Fetch data from the SQLite database."""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
-        cursor.execute("CREATE TABLE IF NOT EXISTS mapping_printer (id TEXT PRIMARY KEY, name TEXT UNIQUE, label TEXT UNIQUE)")
+        cursor.execute(
+            "CREATE TABLE IF NOT EXISTS mapping_printer (id TEXT PRIMARY KEY, name TEXT UNIQUE, label TEXT UNIQUE)")
         cursor.execute("SELECT * FROM mapping_printer")
         rows = cursor.fetchall()
         conn.close()
@@ -251,14 +254,32 @@ class SystemTrayApp:
         self.update_treeview()
 
         # Schedule the next refresh
-        self.root.after(60000, self.refresh_list)  # 60000 milliseconds = 1 minute
+        self.root.after(10000, self.refresh_list)
+
+    def refresh_status(self):
+        """Refresh the status of the backend server."""
+        if self.service_status:
+            import requests
+
+            try:
+                host = self.hostname_entry.get().strip()
+                port = self.port_entry.get().strip()
+                response = requests.get(f"http://{host}:{port}")
+                if response.status_code != 200:
+                    self.service_status = False
+                    self.service_button.config(text="Start Service")
+            except requests.exceptions.RequestException:
+                self.service_status = False
+                self.service_button.config(text="Start Service")
+
+        self.root.after(10000, self.refresh_status)
 
     def minimize_to_tray(self):
         """Minimize the window to the system tray."""
         self.root.withdraw()
         image = Image.open("app.ico")  # Ensure this file exists
-        menu = (pystray.MenuItem('Quit', self.quit_window),
-                pystray.MenuItem('Show', self.show_window))
+        menu = (pystray.MenuItem('Show', self.show_window),
+                pystray.MenuItem('Quit', self.quit_window))
         icon = pystray.Icon("name", image, "System Tray App", menu)
         icon.run()
 

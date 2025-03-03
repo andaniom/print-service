@@ -1,4 +1,5 @@
 import subprocess
+import sys
 import time
 
 import logging
@@ -24,6 +25,7 @@ def initialize_printer(vendor_id, product_id):
         logger.error(f"Failed to initialize printer: {e}")
         return None
 
+
 def print_pdf(pdf_file, label):
     try:
         images = convert_pdf_to_images(pdf_file)
@@ -41,6 +43,7 @@ def print_pdf(pdf_file, label):
     finally:
         os.remove(pdf_file)
 
+
 def print_image(image, label):
     try:
         mapping = get_mapping_printer_by_label(label)
@@ -54,7 +57,6 @@ def print_image(image, label):
         # printer.text("\n")
         printer.text("Hello, TSC TTP 244 Pro!\n")
         printer.close()
-
 
         # printer.cut()
         logger.info(f"Printed: {label}")
@@ -93,31 +95,39 @@ def print_pdf(pdf_file: str, page_number: int, printer_label: str):
             raise Exception(f"An error occurred while printing: {e}")
     elif os.name == 'nt':  # Windows
         try:
-            # Execute the ShellExecute command to print the PDF
-            # /d: option specifies the printer name
-            # /p option specifies the page number
-            # "." specifies the working directory
-            # 0 specifies the showCmd parameter
-            # Execute the print command with SumatraPDF
-            sumatra_pdf_path = str(Path(__file__).parent / "print.exe")
-            if not os.path.exists(sumatra_pdf_path):
-                raise FileNotFoundError(f"SumatraPDF path not found: {sumatra_pdf_path}")
-            command = [
-                sumatra_pdf_path,
-                "-print-to", printer_name,
-                "-page", str(page_number),
-                pdf_file
-            ]
+            exec_path = get_resource_path("print.exe")
+
+            command = [exec_path, '-print-to', printer_name, pdf_path]
+            if page_number:
+                command.extend(['-print-settings', f'page={page_number}'])
 
             # Log the command being executed
             logging.info(f"Executing command: {' '.join(command)}")
 
             # Run the command
-            subprocess.run(command, check=True)
+            result = subprocess.run(command, capture_output=True, text=True)
+
+            # Check for errors
+            if result.returncode != 0:
+                print(f"Error: {result.stderr}")
+            else:
+                logging.info("PDF sent to printer successfully!")
         except Exception as e:
             raise Exception(f"An error occurred while printing: {e}")
     else:
         raise Exception("Unsupported operating system")
+
+
+def get_resource_path(relative_path):
+    """Get the absolute path to a bundled resource."""
+    if hasattr(sys, '_MEIPASS'):
+        # Running in a PyInstaller bundle
+        base_path = sys._MEIPASS
+    else:
+        # Running in a normal Python environment
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
+
 
 def print_image_to_printer(image, printer_port):
     # Configure the serial connection

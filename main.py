@@ -1,7 +1,3 @@
-import subprocess
-import threading
-import time
-
 from view.app import start_frontend
 
 
