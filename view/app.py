@@ -98,7 +98,7 @@ class SystemTrayApp:
         for device in self.list_device:
             self.tree.insert("", "end", values=(device["id"], device["name"], device["label"]))
 
-        self.tree.bind("<Button-2>", self.on_right_click)
+        self.tree.bind("<Button-3>", self.on_right_click)
         # self.tree.bind("<Double-1>", self.on_double_click)
 
     def on_right_click(self, event):
@@ -433,7 +433,9 @@ class SystemTrayApp:
                 project_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
                 self.backend_process = subprocess.Popen(
                     ["uvicorn", "api.main:app", "--host", host, "--port", port],
-                    cwd=project_dir  # Set the working directory to the project directory
+                    cwd=project_dir,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE
                 )
                 self.service_status = True
                 self.service_button.config(text="Stop Service")
