@@ -20,7 +20,6 @@ class SystemTrayApp:
         self.hostname_entry = None
         self.hostname_label = None
         self.root = root
-        self.root.iconbitmap("app.ico")
         self.root.configure(bg="#FFFFFF")
         self.root.title("System Print")
         self.root.geometry('1000x650')
