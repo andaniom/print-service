@@ -91,7 +91,16 @@ class SystemTrayApp:
         for device in self.list_device:
             self.tree.insert("", "end", values=(device["id"], device["name"], device["label"]))
 
+        self.tree.bind("<Button-2>", self.on_right_click)
         self.tree.bind("<Double-1>", self.on_double_click)
+
+    def on_right_click(self, event):
+        """Handle right click and show delete option."""
+        row_id = self.tree.identify_row(event.y)
+        if row_id:
+            menu = tk.Menu(self.tree, tearoff=0)
+            menu.add_command(label="Delete", command=lambda: self.delete_row(row_id))
+            menu.tk_popup(event.x_root, event.y_root)
 
     def create_add_printer_form(self):
         """Create a form to add a new printer."""
@@ -197,6 +206,8 @@ class SystemTrayApp:
 
         # Get the column position
         column_index = int(column[1]) - 1
+        if column_index == 3:
+            return
 
         # Get the current value of the cell
         current_value = self.tree.item(row_id, "values")[column_index]
@@ -209,6 +220,22 @@ class SystemTrayApp:
 
         # Place the entry widget in the correct position
         entry_edit.place(x=event.x, y=event.y, anchor="w")
+
+    def delete_row(self, row_id):
+        """Delete a row from the Treeview and SQLite database."""
+        # Get the current values of the row
+        current_values = list(self.tree.item(row_id, "values"))
+        id = current_values[0]  # ID is the first column
+
+        # Delete from the SQLite database
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM mapping_printer WHERE id = ?", (id,))
+        conn.commit()
+        conn.close()
+
+        # Delete from the Treeview
+        self.tree.delete(row_id)
 
     def save_edit(self, entry_edit, row_id, column_index):
         """Save the edited value to the Treeview and SQLite database."""
