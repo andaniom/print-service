@@ -2,7 +2,6 @@ fastapi
 uvicorn
 sqlalchemy
 pydantic
-escpos
 pdf2image
 python-dotenv
 python-multipart

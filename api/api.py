@@ -11,9 +11,7 @@ from api.repo.mapping_printer import get_mapping_printers_from_db, save_mapping_
 from api.repo.printer import get_printers_from_db
 from api.schemas import MappingPrinter
 from api.services.file_service import save_file
-from api.services.printer_service import initialize_printer
 from api.services.queue_service import print_queue
-from api.utils.usb_util import list_usb_printers
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
@@ -39,23 +37,23 @@ def save_mapping_printers(printer : MappingPrinter, db: Session = Depends(get_db
         logger.error(f"Failed to save printers: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
-@app.get("/printer-device")
-def get_printer_device():
-    printers = list_usb_printers()
-    return JSONResponse(content={"printers": printers})
+# @app.get("/printer-device")
+# def get_printer_device():
+#     printers = list_usb_printers()
+#     return JSONResponse(content={"printers": printers})
 
 @app.get("/printers")
 def get_printers(db: Session = Depends(get_db)):
     printers = get_printers_from_db(db)
     return JSONResponse(content={"printers": printers})
 
-@app.post("/select-printer")
-def select_printer(vendor_id: str, product_id: str):
-    printer = initialize_printer(vendor_id, product_id)
-    if printer:
-        return JSONResponse(content={"message": "Printer selected successfully"})
-    else:
-        raise HTTPException(status_code=400, detail="Failed to select printer")
+# @app.post("/select-printer")
+# def select_printer(vendor_id: str, product_id: str):
+#     printer = initialize_printer(vendor_id, product_id)
+#     if printer:
+#         return JSONResponse(content={"message": "Printer selected successfully"})
+#     else:
+#         raise HTTPException(status_code=400, detail="Failed to select printer")
 
 @app.post("/print_eticket")
 async def add_to_queue(file: UploadFile = File(...), metadata: str = Form(...)):

@@ -1,6 +1,5 @@
 import sqlite3
 import subprocess
-import sys
 import threading
 import tkinter as tk
 from tkinter import messagebox
@@ -434,7 +433,7 @@ class SystemTrayApp:
                 import os
                 project_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
                 self.backend_process = subprocess.Popen(
-                    [sys.executable, "api/api.py", host, port],
+                    ["uvicorn", "api.api:app", "--host", host, "--port", port],
                     cwd=project_dir
                 )
                 self.service_status = True
