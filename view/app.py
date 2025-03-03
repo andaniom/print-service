@@ -433,8 +433,9 @@ class SystemTrayApp:
                 import os
                 project_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
                 self.backend_process = subprocess.Popen(
-                    [os.path.join(project_dir, "api.exe"), host, port],
-                    cwd=project_dir
+                    ["./backend_server.exe", "--host", host, "--port", port],  # Pass host and port
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
                 )
                 self.service_status = True
                 self.service_button.config(text="Stop Service")
