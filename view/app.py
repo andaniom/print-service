@@ -12,6 +12,7 @@ from PIL import Image
 class SystemTrayApp:
 
     def __init__(self, root):
+        self.add_frame = None
         self.service_button = None
         self.db_path = "local.db"
         self.list_device = self.fetch_data_from_db()
@@ -26,6 +27,11 @@ class SystemTrayApp:
         self.root.protocol('WM_DELETE_WINDOW', self.minimize_to_tray)
         self.service_status = False
         self.backend_process = None
+        self.update_device = False
+        self.label_entry = None
+        self.name_entry = None
+        self.id_entry = None
+        self.submit_button = None
 
         self.create_widgets()
         self.refresh_list()
@@ -92,39 +98,46 @@ class SystemTrayApp:
             self.tree.insert("", "end", values=(device["id"], device["name"], device["label"]))
 
         self.tree.bind("<Button-2>", self.on_right_click)
-        self.tree.bind("<Double-1>", self.on_double_click)
+        # self.tree.bind("<Double-1>", self.on_double_click)
 
     def on_right_click(self, event):
         """Handle right click and show delete option."""
         row_id = self.tree.identify_row(event.y)
         if row_id:
             menu = tk.Menu(self.tree, tearoff=0)
+            menu.add_command(label="Edit", command=lambda: self.edit_row(row_id))
             menu.add_command(label="Delete", command=lambda: self.delete_row(row_id))
             menu.tk_popup(event.x_root, event.y_root)
 
     def create_add_printer_form(self):
         """Create a form to add a new printer."""
-        add_frame = tk.LabelFrame(self.root, text="Add New Printer", padx=10, pady=10)
-        add_frame.pack(fill=tk.X, padx=10, pady=5)
+        self.add_frame = tk.LabelFrame(self.root, text="New Printer", padx=10, pady=10)
+        self.add_frame.pack(fill=tk.X, padx=10, pady=5)
 
         # ID Field
-        tk.Label(add_frame, text="ID:").grid(row=0, column=0, padx=5, pady=5)
-        self.id_entry = tk.Entry(add_frame)
+        tk.Label(self.add_frame, text="ID:").grid(row=0, column=0, padx=5, pady=5)
+        self.id_entry = tk.Entry(self.add_frame)
         self.id_entry.grid(row=0, column=1, padx=5, pady=5)
 
         # Name Field
-        tk.Label(add_frame, text="Name:").grid(row=1, column=0, padx=5, pady=5)
-        self.name_entry = tk.Entry(add_frame)
+        tk.Label(self.add_frame, text="Name:").grid(row=1, column=0, padx=5, pady=5)
+        self.name_entry = tk.Entry(self.add_frame)
         self.name_entry.grid(row=1, column=1, padx=5, pady=5)
 
         # Label Field
-        tk.Label(add_frame, text="Label:").grid(row=2, column=0, padx=5, pady=5)
-        self.label_entry = tk.Entry(add_frame)
+        tk.Label(self.add_frame, text="Label:").grid(row=2, column=0, padx=5, pady=5)
+        self.label_entry = tk.Entry(self.add_frame)
         self.label_entry.grid(row=2, column=1, padx=5, pady=5)
 
         # Add Button
-        add_button = tk.Button(add_frame, text="Add Printer", command=self.add_printer)
-        add_button.grid(row=3, column=0, columnspan=2, pady=10)
+        self.submit_button = tk.Button(self.add_frame, text="Add Printer", command=self.submit_printer)
+        self.submit_button.grid(row=3, column=0, columnspan=2, pady=10)
+
+    def submit_printer(self):
+        if self.update_device:
+            self.update_printer()
+        else:
+            self.add_printer()
 
     def add_printer(self):
         """Add a new printer to the database and update the Treeview."""
@@ -167,6 +180,40 @@ class SystemTrayApp:
         self.id_entry.delete(0, tk.END)
         self.name_entry.delete(0, tk.END)
         self.label_entry.delete(0, tk.END)
+
+    def update_printer(self):
+        id = self.id_entry.get().strip()
+        name = self.name_entry.get().strip()
+        label = self.label_entry.get().strip()
+
+        if not id or not name or not label:
+            messagebox.showwarning("Input Error", "Please fill in all fields.")
+            return
+
+        # Update the database
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        try:
+            cursor.execute("UPDATE mapping_printer SET id = ?, name = ?, label = ? WHERE id = ?", (id, name, label, id))
+            conn.commit()
+        except sqlite3.IntegrityError as e:
+            messagebox.showwarning("Database Error", str(e))
+            return
+        finally:
+            conn.close()
+
+        # Refresh the list and update the Treeview
+        self.list_device = self.fetch_data_from_db()
+        self.update_treeview()
+
+        # Clear the form fields
+        self.id_entry.config(state="normal")
+        self.id_entry.delete(0, tk.END)
+        self.name_entry.delete(0, tk.END)
+        self.label_entry.delete(0, tk.END)
+        self.update_device = False
+        self.submit_button.config(text="Add Printer")
+        self.add_frame.config(text="New Printer")
 
     def is_id_exists(self, id):
         """Check if the ID already exists in the database."""
@@ -220,6 +267,20 @@ class SystemTrayApp:
 
         # Place the entry widget in the correct position
         entry_edit.place(x=event.x, y=event.y, anchor="w")
+
+    def edit_row(self, row_id):
+        """Edit a row in the Treeview."""
+        current_values = list(self.tree.item(row_id, "values"))
+        id = current_values[0]  # ID is the first column
+        name = current_values[1]
+        label = current_values[2]
+        self.update_device = True
+        self.id_entry.insert(0, id)
+        self.id_entry.configure(state="readonly")
+        self.name_entry.insert(0, name)
+        self.label_entry.insert(0, label)
+        self.submit_button.config(text="Update Printer")
+        self.add_frame.config(text="Update Printer")
 
     def delete_row(self, row_id):
         """Delete a row from the Treeview and SQLite database."""
