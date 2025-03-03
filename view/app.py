@@ -91,6 +91,8 @@ class SystemTrayApp:
         for device in self.list_device:
             self.tree.insert("", "end", values=(device["id"], device["name"], device["label"]))
 
+        self.tree.bind("<Double-1>", self.on_double_click)
+
     def create_add_printer_form(self):
         """Create a form to add a new printer."""
         add_frame = tk.LabelFrame(self.root, text="Add New Printer", padx=10, pady=10)
