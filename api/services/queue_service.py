@@ -3,7 +3,6 @@ import threading
 
 from api.logger import logger
 from api.services.printer_service import print_pdf
-from api.utils.pdf_util import convert_pdf_to_images
 
 print_queue = queue.Queue()
 
@@ -14,7 +13,7 @@ def process_queue():
             break
         if metadata_json:
             try :
-                images = convert_pdf_to_images(pdf_file)
+                # images = convert_pdf_to_images(pdf_file)
                 data = metadata_json['data']
                 for item in data:
                     printer_label = item['printer']
