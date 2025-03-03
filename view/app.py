@@ -433,7 +433,7 @@ class SystemTrayApp:
                 import os
                 project_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
                 self.backend_process = subprocess.Popen(
-                    ["uvicorn", "api.api:app", "--host", host, "--port", port],
+                    [os.path.join(project_dir, "api.exe"), host, port],
                     cwd=project_dir
                 )
                 self.service_status = True
