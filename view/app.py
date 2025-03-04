@@ -443,7 +443,8 @@ class SystemTrayApp:
     def stop_backend(self):
         """Stop the backend server."""
         if self.backend_process:
-            self.backend_process.terminate()  # Terminate the backend process
+            self.backend_process.terminate()
+            subprocess.run(['taskkill', '/im', 'api.exe', '/f'])
             self.backend_process = None
             self.service_status = False
             self.service_button.config(text="Start Service")
