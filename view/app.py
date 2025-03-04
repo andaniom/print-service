@@ -13,19 +13,21 @@ from PIL import Image
 class SystemTrayApp:
 
     def __init__(self, root):
+        self.header_frame = None
         self.printer_frame = None
         self.add_frame = None
         self.service_button = None
         self.db_path = "local.db"
         self.list_device = self.fetch_data_from_db()
         self.port_label = None
+        self.port_entry = None
         self.service_frame = None
         self.hostname_entry = None
         self.hostname_label = None
         self.root = root
         self.root.configure(bg="#FFFFFF")
-        self.root.title("System Print")
-        self.root.geometry('1000x650')
+        self.root.title("Ecalyptus Printer Manager")
+        self.root.geometry('600x650')
         self.root.protocol('WM_DELETE_WINDOW', self.minimize_to_tray)
         self.service_status = False
         self.backend_process = None
@@ -42,29 +44,10 @@ class SystemTrayApp:
 
     def create_widgets(self):
         # Input port and hostname
-        self.service_frame = tk.LabelFrame(self.root, text="Service Setting", padx=10, pady=10)
-        self.service_frame.pack(fill=tk.X, padx=10, pady=5)
-
-        self.hostname_label = tk.Label(self.service_frame, text="Hostname    ")
-        self.hostname_label.grid(row=0, column=0, sticky=tk.W)
-        self.hostname_entry = tk.Entry(self.service_frame, width=20)
-        self.hostname_entry.insert(0, "localhost")
-        self.hostname_entry.grid(row=0, column=1, sticky=tk.E)
-
-        self.port_label = tk.Label(self.service_frame, text="Port              ")
-        self.port_label.grid(row=1, column=0, sticky=tk.W)
-        self.port_entry = tk.Entry(self.service_frame, width=20)
-        self.port_entry.insert(0, "2212")
-        self.port_entry.grid(row=1, column=1, sticky=tk.E)
-
-        # Add Start Service
-        self.service_button = tk.Button(self.service_frame, text="Start Service", command=self.toggle_service)
-        self.service_button.grid(row=2, column=0, columnspan=2, pady=10)
-
+        self.header_app()
         self.printer_frame = tk.LabelFrame(self.root, text="List Printer", padx=10, pady=10)
         self.printer_frame.pack(fill=tk.X, padx=10, pady=5)
         self.create_editable_table()
-        self.create_add_printer_form()
         self.log_frame = tk.LabelFrame(self.root, text="Log", padx=10, pady=10)
         self.log_frame.pack(fill=tk.BOTH, expand=True)
         self.log_text = tk.Text(self.log_frame, height=10)
@@ -136,10 +119,41 @@ class SystemTrayApp:
             menu.add_command(label="Delete", command=lambda: self.delete_row(row_id))
             menu.tk_popup(event.x_root, event.y_root)
 
-    def create_add_printer_form(self):
+    def header_app(self):
+        self.header_frame = tk.Frame(self.root)
+        self.header_frame.pack(fill=tk.X, padx=10, pady=5)
+
+        left_frame = tk.Frame(self.header_frame)
+        left_frame.pack(side=tk.LEFT, fill=tk.Y)
+        self.create_service_setting(left_frame)
+
+        right_frame = tk.Frame(self.header_frame)
+        right_frame.pack(side=tk.LEFT, fill=tk.Y)
+        self.create_add_printer_form(right_frame)
+
+    def create_service_setting(self, parent):
+        self.service_frame = tk.LabelFrame(parent, text="Service Setting", padx=5, pady=5)
+        self.service_frame.pack(fill=tk.X, padx=5, pady=5)
+        self.hostname_label = tk.Label(self.service_frame, text="Hostname")
+        self.hostname_label.grid(row=0, column=0, sticky=tk.W)
+        self.hostname_entry = tk.Entry(self.service_frame, width=20)
+        self.hostname_entry.insert(0, "localhost")
+        self.hostname_entry.grid(row=0, column=1, sticky=tk.E)
+
+        self.port_label = tk.Label(self.service_frame, text="Port")
+        self.port_label.grid(row=1, column=0, sticky=tk.W)
+        self.port_entry = tk.Entry(self.service_frame, width=20)
+        self.port_entry.insert(0, "2212")
+        self.port_entry.grid(row=1, column=1, sticky=tk.E)
+
+        # Add Start Service
+        self.service_button = tk.Button(self.service_frame, text="Start Service", command=self.toggle_service)
+        self.service_button.grid(row=2, column=0, columnspan=2, pady=10)
+
+    def create_add_printer_form(self, parent):
         """Create a form to add a new printer."""
-        self.add_frame = tk.LabelFrame(self.root, text="New Printer", padx=10, pady=10)
-        self.add_frame.pack(fill=tk.X, padx=10, pady=5)
+        self.add_frame = tk.LabelFrame(parent, text="New Printer", padx=5, pady=5)
+        self.add_frame.pack(fill=tk.X, padx=5, pady=5)
 
         # ID Field
         tk.Label(self.add_frame, text="ID:").grid(row=0, column=0, padx=5, pady=5)
