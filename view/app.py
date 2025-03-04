@@ -1,3 +1,4 @@
+import os
 import sqlite3
 import subprocess
 import threading
@@ -12,6 +13,7 @@ from PIL import Image
 class SystemTrayApp:
 
     def __init__(self, root):
+        self.printer_frame = None
         self.add_frame = None
         self.service_button = None
         self.db_path = "local.db"
@@ -63,6 +65,29 @@ class SystemTrayApp:
         self.printer_frame.pack(fill=tk.X, padx=10, pady=5)
         self.create_editable_table()
         self.create_add_printer_form()
+        self.log_frame = tk.LabelFrame(self.root, text="Log", padx=10, pady=10)
+        self.log_frame.pack(fill=tk.BOTH, expand=True)
+        self.log_text = tk.Text(self.log_frame, height=10)
+        self.log_text.pack(fill=tk.BOTH, expand=True)
+        self.log_text.tag_config("red", foreground="red")
+        self.log_text.tag_config("green", foreground="green")
+        self.update_log()
+
+    def update_log(self):
+        """Update the log from the file."""
+        file_path = "backend.log"
+        if not os.path.exists(file_path):
+            with open(file_path, "w"):
+                pass
+        with open(file_path, "r") as file:
+            lines = file.readlines()
+            self.log_text.delete("1.0", tk.END)
+            for line in lines[-10:]:
+                if "ERROR" in line:
+                    self.log_text.insert(tk.END, line, "red")
+                else:
+                    self.log_text.insert(tk.END, line, "green")
+        self.log_text.after(1000, self.update_log)
 
     def fetch_data_from_db(self):
         """Fetch data from the SQLite database."""
