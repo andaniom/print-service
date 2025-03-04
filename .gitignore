@@ -1,6 +1,5 @@
 ./build
 ./dist
-backend.log
 api.spec
 Ecalyptus Printer.spec
 EcalyptusPrinterInstaller.exe
