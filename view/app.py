@@ -88,10 +88,11 @@ class SystemTrayApp:
     def create_editable_table(self):
         """Create an editable table using ttk.Treeview."""
         self.tree = ttk.Treeview(self.printer_frame, columns=("ID", "Name", "Label"), show="headings")
+        self.tree.column("ID", width=20, anchor="center")
         self.tree.heading("ID", text="ID")
         self.tree.heading("Name", text="Name")
         self.tree.heading("Label", text="Label")
-        self.tree.pack(fill=tk.X, padx=10, pady=5)
+        self.tree.pack(fill=tk.X, padx=5, pady=5)
 
         # Insert data into the Treeview
         self.update_treeview()
