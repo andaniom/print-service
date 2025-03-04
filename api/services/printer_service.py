@@ -93,7 +93,7 @@ def print_pdf(pdf_file: str, page_number: int, printer_label: str):
             command = [
                 exec_path,
                 '-print-to', printer_name,
-                '-print-settings', f'page {page_number}, noscale, simplex',
+                '-print-settings', f'{page_number}, landscape',
                 pdf_file
             ]
 
@@ -117,10 +117,10 @@ def print_pdf(pdf_file: str, page_number: int, printer_label: str):
 def get_resource_path(relative_path):
     """Get the absolute path to a bundled resource."""
     # if hasattr(sys, '_MEIPASS'):
-    #     # Running in a PyInstaller bundle
+        # Running in a PyInstaller bundle
     #     base_path = sys._MEIPASS
     # else:
-    #     # Running in a normal Python environment
+    # Running in a normal Python environment
     base_path = os.path.abspath(".")
     return os.path.join(base_path, relative_path)
 
