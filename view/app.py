@@ -108,7 +108,7 @@ class SystemTrayApp:
 
         self.tree.bind("<Button-3>", self.on_right_click)
         self.tree.bind("<Button-2>", self.on_right_click)
-        # self.tree.bind("<Double-1>", self.on_double_click)
+        self.tree.bind("<Double-1>", self.on_double_click)
 
     def on_right_click(self, event):
         """Handle right click and show delete option."""
@@ -291,29 +291,30 @@ class SystemTrayApp:
 
     def on_double_click(self, event):
         """Handle double-click events to edit cells."""
-        region_clicked = self.tree.identify_region(event.x, event.y)
-        if region_clicked not in ("tree", "cell"):
-            return
-
-        column = self.tree.identify_column(event.x)
-        row_id = self.tree.identify_row(event.y)
-
-        # Get the column position
-        column_index = int(column[1]) - 1
-        if column_index == 3:
-            return
-
-        # Get the current value of the cell
-        current_value = self.tree.item(row_id, "values")[column_index]
-
-        # Create an entry widget for editing
-        entry_edit = ttk.Entry(self.tree, width=20)
-        entry_edit.insert(0, current_value)
-        entry_edit.bind("<FocusOut>", lambda e: self.save_edit(entry_edit, row_id, column_index))
-        entry_edit.bind("<Return>", lambda e: self.save_edit(entry_edit, row_id, column_index))
-
-        # Place the entry widget in the correct position
-        entry_edit.place(x=event.x, y=event.y, anchor="w")
+        self.edit_row(self.tree.identify_row(event.y))
+        # region_clicked = self.tree.identify_region(event.x, event.y)
+        # if region_clicked not in ("tree", "cell"):
+        #     return
+        #
+        # column = self.tree.identify_column(event.x)
+        # row_id = self.tree.identify_row(event.y)
+        #
+        # # Get the column position
+        # column_index = int(column[1]) - 1
+        # if column_index == 3:
+        #     return
+        #
+        # # Get the current value of the cell
+        # current_value = self.tree.item(row_id, "values")[column_index]
+        #
+        # # Create an entry widget for editing
+        # entry_edit = ttk.Entry(self.tree, width=20)
+        # entry_edit.insert(0, current_value)
+        # entry_edit.bind("<FocusOut>", lambda e: self.save_edit(entry_edit, row_id, column_index))
+        # entry_edit.bind("<Return>", lambda e: self.save_edit(entry_edit, row_id, column_index))
+        #
+        # # Place the entry widget in the correct position
+        # entry_edit.place(x=event.x, y=event.y, anchor="w")
 
     def clear_form(self):
         self.id_entry.config(state="normal")
@@ -426,7 +427,7 @@ class SystemTrayApp:
         image = Image.open("app.ico")  # Ensure this file exists
         menu = (pystray.MenuItem('Show', self.show_window),
                 pystray.MenuItem('Quit', self.quit_window))
-        icon = pystray.Icon("name", image, "System Tray App", menu)
+        icon = pystray.Icon("name", image, "Ecalyptus Printer Manager", menu)
         icon.run()
 
     def quit_window(self, icon):
