@@ -4,15 +4,11 @@ This is a simple API for the [Ecalyptus Printer](https://github.com/andaniom/pri
 
 ## Installation
 
-```bash
-pip install -r requirements.txt
-
-```bash
-./build.bat
-```
+1. Install the required packages with `pip install -r requirements.txt`
+2. Run the `build.bat` script to build the application
 
 ### Structure
 
-* `api/` - fast api to receive print jobs
-* `view/` - tkinter Handle View
+* `api/` - Fast API to receive print jobs
+* `view/` - Tkinter Handle View
 * `README.md` - This file
