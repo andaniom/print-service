@@ -1,6 +1,6 @@
-# Eucalyptus Printer Manager
+# Ecalyptus Printer Manager
 
-This is a simple API for the [Eucalyptus Printer](https://github.com/Eucalyptus/Printer).
+This is a simple API for the [Ecalyptus Printer](https://github.com/andaniom/print-service).
 
 ## Installation
 
