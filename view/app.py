@@ -125,31 +125,34 @@ class SystemTrayApp:
         self.header_frame.pack(fill=tk.X, padx=10, pady=5)
 
         left_frame = tk.Frame(self.header_frame)
-        left_frame.pack(side=tk.LEFT, fill=tk.Y)
+        left_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         self.create_service_setting(left_frame)
 
         right_frame = tk.Frame(self.header_frame)
-        right_frame.pack(side=tk.LEFT, fill=tk.Y)
+        right_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         self.create_add_printer_form(right_frame)
 
     def create_service_setting(self, parent):
         self.service_frame = tk.LabelFrame(parent, text="Service Setting", padx=5, pady=5)
         self.service_frame.pack(fill=tk.X, padx=5, pady=5)
+
         self.hostname_label = tk.Label(self.service_frame, text="Hostname")
-        self.hostname_label.grid(row=0, column=0, sticky=tk.W)
+        self.hostname_label.grid(row=0, column=0, padx=5, pady=5, sticky="w")
         self.hostname_entry = tk.Entry(self.service_frame, width=20)
         self.hostname_entry.insert(0, "localhost")
-        self.hostname_entry.grid(row=0, column=1, sticky=tk.E)
+        self.hostname_entry.grid(row=0, column=1, padx=5, pady=5)
 
         self.port_label = tk.Label(self.service_frame, text="Port")
-        self.port_label.grid(row=1, column=0, sticky=tk.W)
+        self.port_label.grid(row=1, column=0, padx=5, pady=5, sticky=tk.W)
         self.port_entry = tk.Entry(self.service_frame, width=20)
         self.port_entry.insert(0, "2212")
-        self.port_entry.grid(row=1, column=1, sticky=tk.E)
+        self.port_entry.grid(row=1, column=1, padx=5, pady=5)
 
         # Add Start Service
         self.service_button = tk.Button(self.service_frame, text="Start Service", command=self.toggle_service)
-        self.service_button.grid(row=2, column=0, columnspan=2, pady=10)
+        self.service_button.grid(row=2, column=1, padx=5, pady=5)
+
+        self.service_frame.grid_rowconfigure(3, minsize=38)
 
     def create_add_printer_form(self, parent):
         """Create a form to add a new printer."""
@@ -157,19 +160,19 @@ class SystemTrayApp:
         self.add_frame.pack(fill=tk.X, padx=5, pady=5)
 
         # ID Field
-        tk.Label(self.add_frame, text="ID:").grid(row=0, column=0, padx=5, pady=5)
+        tk.Label(self.add_frame, text="ID:").grid(row=0, column=0, padx=5, pady=5, sticky="w")
         self.id_entry = tk.Entry(self.add_frame)
         self.id_entry.grid(row=0, column=1, padx=5, pady=5)
 
         # Name Field
-        tk.Label(self.add_frame, text="Name:").grid(row=1, column=0, padx=5, pady=5)
+        tk.Label(self.add_frame, text="Name:").grid(row=1, column=0, padx=5, pady=5, sticky="w")
         self.name_entry = tk.Entry(self.add_frame)
-        self.name_entry.grid(row=1, column=1, padx=5, pady=5)
+        self.name_entry.grid(row=1, column=1, padx=5, pady=5, sticky="w")
 
         # Label Field
-        tk.Label(self.add_frame, text="Label:").grid(row=2, column=0, padx=5, pady=5)
+        tk.Label(self.add_frame, text="Label:").grid(row=2, column=0, padx=5, pady=5, sticky="w")
         self.label_entry = tk.Entry(self.add_frame)
-        self.label_entry.grid(row=2, column=1, padx=5, pady=5)
+        self.label_entry.grid(row=2, column=1, padx=5, pady=5, sticky="w")
 
         # Buttons
         button_frame = tk.Frame(self.add_frame)
