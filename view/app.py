@@ -9,6 +9,8 @@ from tkinter import ttk
 import pystray
 from PIL import Image
 
+from view.config import Config
+
 
 class SystemTrayApp:
 
@@ -483,12 +485,19 @@ class SystemTrayApp:
             try:
                 # Set the working directory to the project directory
                 import os
-                project_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-                self.backend_process = subprocess.Popen(
-                    ["./api.exe", "--host", host, "--port", port],  # Pass host and port
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                )
+                if Config.DEBUG:
+                    project_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+                    self.backend_process = subprocess.Popen(
+                        ["uvicorn", "api.api:app", "--host", host, "--port", port],
+                        cwd=project_dir  # Set the working directory to the project directory
+                    )
+                else:
+                    self.backend_process = subprocess.Popen(
+                        ["./api.exe", "--host", host, "--port", port],  # Pass host and port
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                    )
+
                 self.service_status = True
                 self.service_button.config(text="Stop Service")
                 messagebox.showinfo("Backend Started", f"Backend server started at {host}:{port}")
