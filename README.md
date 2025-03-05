@@ -1,4 +1,18 @@
-# print-service
+# Eucalyptus Printer Manager
 
-pyinstaller --onefile -F api/api.py --clean --noconsole  
-pyinstaller --onefile --add-data "dist/api.exe:." --add-data "view:view" --add-data "print.exe:." --add-data "app.ico:." --icon "app.ico" --noconsole --name "Ecalyptus Printer" main.py
+This is a simple API for the [Eucalyptus Printer](https://github.com/Eucalyptus/Printer).
+
+## Installation
+
+```bash
+pip install -r requirements.txt
+
+```bash
+./build.bat
+```
+
+### Structure
+
+* `api/` - fast api to receive print jobs
+* `view/` - tkinter Handle View
+* `README.md` - This file
