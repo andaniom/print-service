@@ -4,8 +4,10 @@ This is a simple API for the [Ecalyptus Printer](https://github.com/andaniom/pri
 
 ## Installation
 
-1. Install the required packages with `pip install -r requirements.txt`
-2. Run the `build.bat` script to build the application
+1.Clone the repository
+2.Install InnoSetup for building Windows installers, Download the latest version from [here](https://www.jrsoftware.org/isinfo.php) 
+2.Install the required packages with `pip install -r requirements.txt`
+3.Run the `build.bat` script to build the application
 
 ### Structure
 
