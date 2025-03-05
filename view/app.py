@@ -238,6 +238,13 @@ class SystemTrayApp:
             messagebox.showwarning("Input Error", "Please fill in all fields.")
             return
 
+        if self.is_name_exists(name):
+            messagebox.showwarning("Duplicate Name", "A printer with this Name already exists.")
+            return
+        if self.is_label_exists(label):
+            messagebox.showwarning("Duplicate Label", "A printer with this Label already exists.")
+            return
+
         # Update the database
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
