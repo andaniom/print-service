@@ -1,6 +1,7 @@
 import os
 import sqlite3
 import subprocess
+import sys
 import threading
 import tkinter as tk
 from tkinter import messagebox
@@ -15,6 +16,8 @@ from view.config import Config
 class SystemTrayApp:
 
     def __init__(self, root):
+        self.icon = None
+        self.menu = None
         self.header_frame = None
         self.printer_frame = None
         self.add_frame = None
@@ -438,10 +441,10 @@ class SystemTrayApp:
         """Minimize the window to the system tray."""
         self.root.withdraw()
         image = Image.open("app.ico")  # Ensure this file exists
-        menu = (pystray.MenuItem('Show', self.show_window),
+        self.menu = (pystray.MenuItem('Show', self.show_window),
                 pystray.MenuItem('Quit', self.quit_window))
-        icon = pystray.Icon("name", image, "Ecalyptus Printer Manager", menu)
-        icon.run()
+        self.icon = pystray.Icon("name", image, "Ecalyptus Printer Manager", self.menu)
+        self.icon.run()
 
     def quit_window(self, icon):
         """Stop the system tray icon and destroy the window."""
