@@ -7,7 +7,8 @@ from api.logger import logger
 
 
 def save_file(file: UploadFile, filename: str):
-    temp_dir = Config.TEMP_DIR
+    project_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    temp_dir = os.path.join(project_dir, Config.TEMP_DIR)
     if not os.path.exists(temp_dir):
         os.makedirs(temp_dir)
     temp_file = os.path.join(temp_dir, filename)
