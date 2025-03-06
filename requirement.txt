@@ -9,3 +9,4 @@ requests
 pystray
 pyinstaller
 python-multipart
+fasteners

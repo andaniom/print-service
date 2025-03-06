@@ -7,6 +7,7 @@ import tkinter as tk
 from tkinter import messagebox
 from tkinter import ttk
 
+import fasteners
 import pystray
 from PIL import Image
 
@@ -504,15 +505,19 @@ class SystemTrayApp:
 
 
 def start_frontend():
-    mutex_name = 'ecal_print'
-    mutex = multiprocessing.Lock(name=mutex_name)
-    if mutex.acquire(False):  # Non-blocking attempt
-        root = tk.Tk()
-        SystemTrayApp(root)
-        root.mainloop()
+    mutex_name = 'ecal_print.lock'
+    lock = fasteners.InterProcessLock(mutex_name)
+
+    if lock.acquire(blocking=False):  # Non-blocking lock
+        try:
+            root = tk.Tk()
+            SystemTrayApp(root)
+            root.mainloop()
+        finally:
+            lock.release()
     else:
-        tk.messagebox.showwarning("Application Already Running",
-                                  "Another instance of the application is already running.")
+        messagebox.showwarning("Application Already Running",
+                               "Another instance of the application is already running.")
 
 if __name__ == "__main__":
     start_frontend()
