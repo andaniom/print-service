@@ -1,3 +1,4 @@
+import multiprocessing
 import os
 import sqlite3
 import subprocess
@@ -457,14 +458,13 @@ class SystemTrayApp:
             self.service_status = False
             self.service_button.config(text="Start Service")
             messagebox.showinfo("Backend Stopped", "Backend server stopped.")
-        else:
-            messagebox.showwarning("Backend Error", "No backend process is running.")
 
     def toggle_service(self):
         """Start or stop the backend service."""
         if self.service_status:
             self.stop_backend()
         else:
+            self.stop_backend()
             self.start_backend()
 
     def start_backend(self):
@@ -504,10 +504,15 @@ class SystemTrayApp:
 
 
 def start_frontend():
-    root = tk.Tk()
-    SystemTrayApp(root)
-    root.mainloop()
-
+    mutex_name = 'ecal_print'
+    mutex = multiprocessing.Lock(name=mutex_name)
+    if mutex.acquire(False):  # Non-blocking attempt
+        root = tk.Tk()
+        SystemTrayApp(root)
+        root.mainloop()
+    else:
+        tk.messagebox.showwarning("Application Already Running",
+                                  "Another instance of the application is already running.")
 
 if __name__ == "__main__":
     start_frontend()
