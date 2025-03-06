@@ -6,3 +6,10 @@ escpos
 pdf2image
 python-dotenv
 lisusb
+fastapi
+uvicorn
+sqlalchemy
+pydantic
+pdf2image
+python-dotenv
+python-multipart
