@@ -1,7 +1,6 @@
 import logging
 import os
 import subprocess
-import sys
 from pathlib import Path
 
 from api.repo.mapping_printer import get_mapping_printer_by_label

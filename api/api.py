@@ -1,16 +1,14 @@
 import json
 import time
 
-from fastapi import FastAPI, File, UploadFile, HTTPException, Depends, Form
+from fastapi import FastAPI, File, UploadFile, Form
 from fastapi.responses import JSONResponse
-from sqlalchemy.orm import Session
 
 from api.database import SessionLocal, engine, Base
 from api.logger import logger
-from api.repo.mapping_printer import get_mapping_printers_from_db, save_mapping_printers_to_db
-from api.schemas import MappingPrinter
 from api.services.file_service import save_file
 from api.services.queue_service import print_queue
+
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
@@ -21,20 +19,6 @@ def get_db():
         yield db
     finally:
         db.close()
-
-@app.get("/mapping-printer")
-def get_mapping_printers(db: Session = Depends(get_db)):
-    printers = get_mapping_printers_from_db(db)
-    return JSONResponse(content={"printers": printers})
-
-@app.post("/mapping-printer")
-def save_mapping_printers(printer : MappingPrinter, db: Session = Depends(get_db)):
-    try:
-        save_mapping_printers_to_db(db, printer)
-        return JSONResponse(content={"message": "Printers saved successfully"})
-    except Exception as e:
-        logger.error(f"Failed to save printers: {e}")
-        raise HTTPException(status_code=500, detail="Internal Server Error")
 
 @app.post("/print_eticket")
 async def add_to_queue(file: UploadFile = File(...), metadata: str = Form(...)):
