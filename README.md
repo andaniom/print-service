@@ -14,3 +14,7 @@ This is a simple API for the [Ecalyptus Printer](https://github.com/andaniom/pri
 * `api/` - Fast API to receive print jobs
 * `view/` - Tkinter Handle View
 * `README.md` - This file
+
+### Screenshot
+
+![Screenshot of the Ecalyptus Printer Manager](screenshot.jpeg)
