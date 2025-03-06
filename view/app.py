@@ -516,8 +516,8 @@ def start_frontend():
         finally:
             lock.release()
     else:
-        messagebox.showwarning("Application Already Running",
-                               "Another instance of the application is already running.")
+        messagebox.showwarning("Ecalyptus Printer Manager",
+                               "The application is already running.")
 
 if __name__ == "__main__":
     start_frontend()
