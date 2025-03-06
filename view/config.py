@@ -1,4 +1,4 @@
 import os
 
 class Config:
-    DEBUG = os.getenv("DEBUG", True)
+    DEBUG = os.getenv("DEBUG", False)
