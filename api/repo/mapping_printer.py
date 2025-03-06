@@ -14,7 +14,6 @@ def get_mapping_printer_by_label(label, db_name='local.db'):
 
         # Check if any printers were found
         if not printer:
-            print("No printer found in the database.")
             return None
 
         # Print the list of printer
