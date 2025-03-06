@@ -95,6 +95,7 @@ def print_pdf(pdf_file: str, page_number: int, printer_label: str):
             command = [
                 exec_path,
                 '-print-to', printer_name,
+                '-silent',
                 '-print-settings', f'{page_number}, landscape',
                 pdf_file
             ]
@@ -107,7 +108,7 @@ def print_pdf(pdf_file: str, page_number: int, printer_label: str):
 
             # Check for errors
             if result.returncode != 0:
-                print(f"Error: {result.stderr}")
+                logging.error(f"Failed to print PDF: {result.stderr}")
             else:
                 logging.info("PDF sent to printer successfully!")
         except Exception as e:
