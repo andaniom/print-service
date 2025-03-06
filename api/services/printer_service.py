@@ -60,7 +60,7 @@ def print_pdf(pdf_file: str, page_number: int, printer_label: str):
     # Validate input
     mapping = get_mapping_printer_by_label(printer_label)
     if mapping is None:
-        logging.warning("No printer selected. Skipping print job.")
+        logging.error("No printer selected. Skipping print job.")
         return
     printer_name = mapping[1]
     pdf_path = Path(pdf_file)
