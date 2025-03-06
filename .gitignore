@@ -11,3 +11,4 @@ test_main.http
 ./api/repo/**/__pycache__/**
 ./api/services/**/__pycache__/**
 ./api/utils/**/__pycache__/
+./.idea
