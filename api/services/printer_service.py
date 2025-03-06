@@ -97,7 +97,7 @@ def print_pdf(pdf_file: str, page_number: int, printer_label: str):
             ]
 
             # Log the command being executed
-            logging.info(f"Executing command: {' '.join(command)}")
+            logging.debug(f"Executing command: {' '.join(command)}")
 
             # Run the command
             result = subprocess.run(command, capture_output=True, text=True)
