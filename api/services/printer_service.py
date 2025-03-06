@@ -108,7 +108,7 @@ def print_pdf(pdf_file: str, page_number: int, printer_label: str):
 
             # Check for errors
             if result.returncode != 0:
-                logging.error(f"Failed to print PDF: {result.stderr}")
+                logging.error(f"Failed to print PDF: Printer {printer_name} not found")
             else:
                 logging.info("PDF sent to printer successfully!")
         except Exception as e:
