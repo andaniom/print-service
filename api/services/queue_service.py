@@ -22,7 +22,7 @@ def process_e_ticket_queue():
             except Exception as e:
                 logger.error(f"Failed to print {pdf_file}: {e}")
         else:
-            logger.warning("metadata_json empty. Skipping print job.")
+            logger.error("metadata_json empty. Skipping print job.")
         e_ticket_print_queue.task_done()
 
 
@@ -41,7 +41,7 @@ def process_queue():
             except Exception as e:
                 logger.error(f"Failed to print {pdf_file}: {e}")
         else:
-            logger.warning("key empty. Skipping print job.")
+            logger.error("key empty. Skipping print job.")
         e_ticket_print_queue.task_done()
 
 
