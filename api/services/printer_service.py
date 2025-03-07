@@ -49,15 +49,9 @@ def print_pdf(pdf_file: str, page_number: int, printer_label: str):
             #     pdf_file
             # ]
 
-            command = [
-                f'"{exec_path}"',
-                f'"{pdf_file}"',
-                f'"{printer_name}"',
-                f'pages={page_number}',
-                '/s'
-            ]
+            command = f'"{exec_path}" "{pdf_file}" "{printer_name}" pages={page_number} /s'
 
-            logging.info(f"Executing command: {' '.join(command)}")
+            logging.info(f"Executing command: {command}")
 
             try:
                 result = subprocess.run(command, capture_output=True, text=True)
