@@ -2,59 +2,9 @@ import logging
 import os
 import subprocess
 from pathlib import Path
+import fitz
 
 from api.repo.mapping_printer import get_mapping_printer_by_label
-
-
-# def initialize_printer(vendor_id, product_id):
-#     try:
-#         printer = Usb(int(vendor_id, 16), int(product_id, 16))
-#         logger.info("Printer initialized successfully.")
-#         return printer
-#     except Exception as e:
-#         logger.error(f"Failed to initialize printer: {e}")
-#         return None
-#
-#
-# def print_pdf(pdf_file, label):
-#     try:
-#         images = convert_pdf_to_images(pdf_file)
-#         mapping = get_mapping_printer_by_label(label)
-#         printer = initialize_printer(mapping['vendor_id'], mapping['product_id'])
-#
-#         for image in images:
-#             printer.image(image)
-#             printer.text("\n")
-#
-#         printer.cut()
-#         logger.info(f"Printed: {pdf_file}")
-#     except Exception as e:
-#         logger.error(f"Failed to print {pdf_file}: {e}")
-#     finally:
-#         os.remove(pdf_file)
-#
-#
-# def print_image(image, label):
-#     try:
-#         mapping = get_mapping_printer_by_label(label)
-#         printer = initialize_printer(mapping[3], mapping[4])
-#
-#         if printer is None:
-#             raise Exception("Printer not found")
-#         printer.open()
-#
-#         # printer.image(image)
-#         # printer.text("\n")
-#         printer.text("Hello, TSC TTP 244 Pro!\n")
-#         printer.close()
-#
-#         # printer.cut()
-#         logger.info(f"Printed: {label}")
-#     except Exception as e:
-#         logger.error(f"Failed to print {label}: {e}")
-#     # finally:
-#     #     os.remove(pdf_file)
-
 
 def print_pdf(pdf_file: str, page_number: int, printer_label: str):
     # Validate input
@@ -89,6 +39,9 @@ def print_pdf(pdf_file: str, page_number: int, printer_label: str):
     elif os.name == 'nt':  # Windows
         try:
             logging.info("print: windows")
+            width, height = get_pdf_page_size(pdf_file, page_number)
+            orientation = get_orientation(width, height)
+
             exec_path = get_resource_path("print.exe")
             logging.info(f"path exe: {exec_path}")
 
@@ -96,7 +49,7 @@ def print_pdf(pdf_file: str, page_number: int, printer_label: str):
                 exec_path,
                 '-print-to', printer_name,
                 '-silent',
-                '-print-settings', f'{page_number}, landscape',
+                '-print-settings', f'{page_number}, {orientation}',
                 pdf_file
             ]
 
@@ -119,46 +72,15 @@ def print_pdf(pdf_file: str, page_number: int, printer_label: str):
 
 def get_resource_path(relative_path):
     """Get the absolute path to a bundled resource."""
-    # if hasattr(sys, '_MEIPASS'):
-        # Running in a PyInstaller bundle
-    #     base_path = sys._MEIPASS
-    # else:
-    # Running in a normal Python environment
     base_path = os.path.abspath(".")
     return os.path.join(base_path, relative_path)
 
 
-# def print_image_to_printer(image, printer_port):
-#     # Configure the serial connection
-#     printer = serial.Serial(port=printer_port, baudrate=9600, timeout=1)
-#
-#     # Save the image temporarily
-#     temp_image_path = "temp_image.bmp"
-#     image.save(temp_image_path, "BMP")
-#
-#     # TSPL commands to print the image
-#     tspl_commands = f"""
-#     SIZE 50 mm, 30 mm
-#     GAP 0 mm, 0 mm
-#     CLS
-#     BITMAP 0,0,"{temp_image_path}"
-#     PRINT 1
-#     """
-#
-#     try:
-#         # Open the serial port
-#         printer.open()
-#         time.sleep(2)  # Wait for the printer to initialize
-#
-#         # Send the TSPL commands to the printer
-#         printer.write(tspl_commands.encode('utf-8'))
-#
-#         print("Image sent to printer.")
-#     except Exception as e:
-#         print(f"An error occurred: {e}")
-#     finally:
-#         # Close the serial connection
-#         printer.close()
-#         # Remove the temporary image file
-#         if os.path.exists(temp_image_path):
-#             os.remove(temp_image_path)
+def get_pdf_page_size(pdf_path, page_number=1):
+    with fitz.open(pdf_path) as pdf:
+        page = pdf[page_number - 1]
+        rect = page.rect
+        return rect.width, rect.height
+
+def get_orientation(width, height):
+    return "landscape" if width > height else "portrait"

@@ -10,3 +10,4 @@ pystray
 pyinstaller
 python-multipart
 fasteners
+pymupdf
