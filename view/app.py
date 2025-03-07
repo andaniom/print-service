@@ -64,7 +64,7 @@ class SystemTrayApp:
 
     def update_log(self):
         """Update the log from the file."""
-        file_path = "backend.log"
+        file_path = os.path.join(os.path.dirname(__file__), "..", "backend.log")
         if not os.path.exists(file_path):
             with open(file_path, "w"):
                 pass

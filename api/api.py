@@ -2,23 +2,22 @@ import json
 import time
 
 from fastapi import FastAPI, File, UploadFile, Form
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from api.database import SessionLocal, engine, Base
 from api.logger import logger
 from api.services.file_service import save_file
 from api.services.queue_service import e_ticket_print_queue, print_queue
 
-Base.metadata.create_all(bind=engine)
-
 app = FastAPI()
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all HTTP methods
+    allow_headers=["*"],  # Allows all headers
+)
 
 @app.post("/print_eticket")
 async def add_to_queue(file: UploadFile = File(...), metadata: str = Form(...)):
@@ -36,7 +35,7 @@ async def add_to_queue(file: UploadFile = File(...), metadata: str = Form(...)):
     e_ticket_print_queue.put((temp_file, metadata_json))
     return JSONResponse(content={"message": "PDF added to print queue"})
 
-@app.get("/print")
+@app.post("/print")
 def print_single(file: UploadFile = File(...), key: str = Form(...)):
     current_time_millis = int(round(time.time() * 1000))
     filename = key + "_" + str(current_time_millis) + ".pdf"
