@@ -45,6 +45,7 @@ def print_single(file: UploadFile = File(...), key: str = Form(...)):
 
 @app.get("/")
 def index():
+    logger.info("index")
     return {"message": "Print Queue API"}
 
 @app.on_event("shutdown")

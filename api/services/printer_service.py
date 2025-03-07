@@ -50,24 +50,22 @@ def print_pdf(pdf_file: str, page_number: int, printer_label: str):
             # ]
 
             command = [
-                exec_path,
+                f'"{exec_path}"',
                 f'"{pdf_file}"',
                 f'"{printer_name}"',
                 f'pages={page_number}',
                 '/s'
             ]
 
-            # Log the command being executed
-            logging.debug(f"Executing command: {' '.join(command)}")
+            logging.info(f"Executing command: {' '.join(command)}")
 
-            # Run the command
-            result = subprocess.run(command, capture_output=True, text=True)
-
-            # Check for errors
-            if result.returncode != 0:
-                logging.error(f"Failed to print PDF: Printer {printer_name} not found")
-            else:
-                logging.info("PDF sent to printer successfully!")
+            try:
+                result = subprocess.run(command, capture_output=True, text=True, check=True)
+                logging.info(f"Print successful: {result.stdout}")
+            except subprocess.CalledProcessError as e:
+                logging.error(f"Print failed: {e.stderr}")
+            except PermissionError:
+                logging.error("Permission error: Please check file and user permissions.")
         except Exception as e:
             raise Exception(f"An error occurred while printing: {e}")
     else:
