@@ -14,9 +14,11 @@ def process_queue_item(item):
 
     try:
         if key:
+            logger.info(f"Processing print job for {pdf_file} with key {key}")
             printer_label = key
             print_pdf(pdf_file, 1, printer_label)
         elif metadata_json:
+            logger.info(f"Processing print job for {pdf_file} with metadata {metadata_json}")
             data = metadata_json['data']
             for item in data:
                 printer_label = item['printer']
