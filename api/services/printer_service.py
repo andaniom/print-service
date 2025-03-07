@@ -53,7 +53,7 @@ def print_pdf(pdf_file: str, page_number: int, printer_label: str):
                 exec_path,
                 f'"{pdf_file}"',
                 f'"{printer_name}"',
-                f'pages = {page_number}',
+                f'pages={page_number}',
                 '/s'
             ]
 
