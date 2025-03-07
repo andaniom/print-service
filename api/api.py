@@ -29,7 +29,7 @@ async def add_to_queue(file: UploadFile = File(...), metadata: str = Form(...)):
         except json.JSONDecodeError as e:
             logger.error(f"Invalid metadata: {e}")
     current_time_millis = int(round(time.time() * 1000))
-    filename = metadata_json['name'] + "_" + str(current_time_millis) + ".pdf"
+    filename = metadata_json['name'] + ".pdf"
 
     temp_file = save_file(file, filename)
     e_ticket_print_queue.put((temp_file, metadata_json))
@@ -45,7 +45,6 @@ def print_single(file: UploadFile = File(...), key: str = Form(...)):
 
 @app.get("/")
 def index():
-    logger.info("index")
     return {"message": "Print Queue API"}
 
 @app.on_event("shutdown")

@@ -60,7 +60,7 @@ def print_pdf(pdf_file: str, page_number: int, printer_label: str):
             logging.info(f"Executing command: {' '.join(command)}")
 
             try:
-                result = subprocess.run(command, capture_output=True, text=True, check=True)
+                result = subprocess.run(command, capture_output=True, text=True)
                 logging.info(f"Print successful: {result.stdout}")
             except subprocess.CalledProcessError as e:
                 logging.error(f"Print failed: {e.stderr}")
