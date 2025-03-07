@@ -2,7 +2,6 @@ import logging
 import os
 import subprocess
 from pathlib import Path
-import fitz
 
 from api.repo.mapping_printer import get_mapping_printer_by_label
 
@@ -39,18 +38,23 @@ def print_pdf(pdf_file: str, page_number: int, printer_label: str):
     elif os.name == 'nt':  # Windows
         try:
             logging.info("print: windows")
-            width, height = get_pdf_page_size(pdf_file, page_number)
-            orientation = get_orientation(width, height)
-
             exec_path = get_resource_path("print.exe")
             logging.info(f"path exe: {exec_path}")
 
+            # command = [
+            #     exec_path,
+            #     '-print-to', printer_name,
+            #     '-silent',
+            #     '-print-settings', f'{page_number}, {orientation}',
+            #     pdf_file
+            # ]
+
             command = [
                 exec_path,
-                '-print-to', printer_name,
-                '-silent',
-                '-print-settings', f'{page_number}, {orientation}',
-                pdf_file
+                f'"{pdf_file}"',
+                f'"{printer_name}"',
+                f'pages = {page_number}',
+                '/s'
             ]
 
             # Log the command being executed
@@ -74,13 +78,3 @@ def get_resource_path(relative_path):
     """Get the absolute path to a bundled resource."""
     base_path = os.path.abspath(".")
     return os.path.join(base_path, relative_path)
-
-
-def get_pdf_page_size(pdf_path, page_number=1):
-    with fitz.open(pdf_path) as pdf:
-        page = pdf[page_number - 1]
-        rect = page.rect
-        return rect.width, rect.height
-
-def get_orientation(width, height):
-    return "landscape" if width > height else "portrait"
