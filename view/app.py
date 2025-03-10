@@ -385,24 +385,37 @@ class SystemTrayApp:
         """Refresh the status of the backend server."""
         if self.service_status:
             def check_backend():
+                """
+                Checks the health of the backend service.
+                If the service is unreachable or unhealthy, it attempts to restart the backend.
+                """
+                host = self.hostname_entry.get().strip()
+                port = self.port_entry.get().strip()
+                backend_health_url = f"http://{host}:{port}/health"
+
                 try:
-                    host = self.hostname_entry.get().strip()
-                    port = self.port_entry.get().strip()
-                    response = requests.get(f"http://{host}:{port}/health")
+                    # Check the health of the backend service
+                    response = requests.get(backend_health_url, timeout=5)
+
                     if response.status_code == 200:
                         self.update_service_status(True)
                     else:
-                        self.stop_backend()
-                        self.start_backend()
+                        self.restart_backend()
                 except requests.exceptions.RequestException:
-                    self.stop_backend()
-                    self.start_backend()
+                    self.restart_backend()
 
             # Run backend check in a thread
             threading.Thread(target=check_backend, daemon=True).start()
 
-        # Schedule next check in 5 minutes
-        self.root.after(5 * 60000, self.refresh_status)
+        # Schedule next check in 1 minutes
+        self.root.after(60000, self.refresh_status)
+
+    def restart_backend(self):
+        """
+        Stops and restarts the backend service.
+        """
+        self.stop_backend()
+        self.start_backend()
 
     def update_service_status(self, is_running):
         """Safely update the service status and button text."""
