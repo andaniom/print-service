@@ -11,6 +11,7 @@ import pystray
 import requests
 from PIL import Image
 
+from api.services.queue_service import worker
 from view.config import Config
 
 
@@ -430,7 +431,8 @@ class SystemTrayApp:
         """Stop the backend server."""
         if self.backend_process:
             self.backend_process.terminate()
-            subprocess.run(['taskkill', '/im', 'ecal-printer-api.exe', '/f'])
+            if os.name == 'nt':
+                subprocess.run(['taskkill', '/im', 'ecal-printer-api.exe', '/f'])
             self.backend_process = None
             self.service_status = False
             self.service_button.config(text="Start Service")
@@ -466,13 +468,13 @@ class SystemTrayApp:
                 if Config.DEBUG:
                     project_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
                     self.backend_process = subprocess.Popen(
-                        ["uvicorn", "api.api:app", "--host", host, "--port", port, "--workers", "3"],
+                        ["uvicorn", "api.api:app", "--host", host, "--port", port],
                         cwd=project_dir,
                     )
                 else:
                     exe_name = "ecal-printer-api.exe" if os.name == "nt" else "./ecal-printer-api"
                     self.backend_process = subprocess.Popen(
-                        [exe_name, "--host", host, "--port", port, "--workers", "3"],
+                        [exe_name, "--host", host, "--port", port],
                         stdout=subprocess.PIPE,
                         stderr=subprocess.PIPE,
                     )

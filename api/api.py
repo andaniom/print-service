@@ -1,5 +1,6 @@
 import time
 
+import argparse
 from fastapi import FastAPI, File, UploadFile, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -69,4 +70,13 @@ initialize_workers()
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=2212, workers=3)
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-p", "--port", type=int, default=2212, help="Port to listen to")
+    parser.add_argument("-H", "--host", default="0.0.0.0", help="Host to listen to")
+    parser.add_argument("-w", "--workers", type=int, default=1, help="Number of workers")
+    args = parser.parse_args()
+
+    logger.info(f"Starting API on {args.host}:{args.port}")
+    uvicorn.run(app, host=args.host, port=args.port)
