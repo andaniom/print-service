@@ -1,21 +1,20 @@
-import json
 import os
+from pathlib import Path
+
 from fastapi import HTTPException, UploadFile
 
 from api.config import Config
 from api.logger import logger
 
 
-def save_file(file: UploadFile, filename: str):
-    project_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-    temp_dir = os.path.join(project_dir, Config.TEMP_DIR)
-    if not os.path.exists(temp_dir):
-        os.makedirs(temp_dir)
-    temp_file = os.path.join(temp_dir, filename)
-    with open(temp_file, "wb") as f:
-        f.write(file.file.read())
-    logger.info(f"File saved: {temp_file}")
-    return temp_file
+def save_file(uploaded_file: UploadFile, filename: str):
+    temp_dir = Path("/tmp/uploads")
+    temp_dir.mkdir(parents=True, exist_ok=True)
+    file_path = temp_dir / filename
+    with open(file_path, "wb") as f:
+        f.write(uploaded_file.file.read())
+    logger.info(f"File saved at {file_path}")
+    return str(file_path)
 
 def validate_file(file: UploadFile):
     if not file.filename.endswith(".pdf"):

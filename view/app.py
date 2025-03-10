@@ -1,4 +1,3 @@
-import multiprocessing
 import os
 import sqlite3
 import subprocess
@@ -9,6 +8,7 @@ from tkinter import ttk
 
 import fasteners
 import pystray
+import requests
 from PIL import Image
 
 from view.config import Config
@@ -265,6 +265,7 @@ class SystemTrayApp:
         self.update_device = False
         self.submit_button.config(text="Add Printer")
         self.add_frame.config(text="New Printer")
+        self.update_device = False
 
     def is_id_exists(self, id):
         """Check if the ID already exists in the database."""
@@ -296,29 +297,6 @@ class SystemTrayApp:
     def on_double_click(self, event):
         """Handle double-click events to edit cells."""
         self.edit_row(self.tree.identify_row(event.y))
-        # region_clicked = self.tree.identify_region(event.x, event.y)
-        # if region_clicked not in ("tree", "cell"):
-        #     return
-        #
-        # column = self.tree.identify_column(event.x)
-        # row_id = self.tree.identify_row(event.y)
-        #
-        # # Get the column position
-        # column_index = int(column[1]) - 1
-        # if column_index == 3:
-        #     return
-        #
-        # # Get the current value of the cell
-        # current_value = self.tree.item(row_id, "values")[column_index]
-        #
-        # # Create an entry widget for editing
-        # entry_edit = ttk.Entry(self.tree, width=20)
-        # entry_edit.insert(0, current_value)
-        # entry_edit.bind("<FocusOut>", lambda e: self.save_edit(entry_edit, row_id, column_index))
-        # entry_edit.bind("<Return>", lambda e: self.save_edit(entry_edit, row_id, column_index))
-        #
-        # # Place the entry widget in the correct position
-        # entry_edit.place(x=event.x, y=event.y, anchor="w")
 
     def clear_form(self):
         self.id_entry.config(state="normal")
@@ -345,20 +323,15 @@ class SystemTrayApp:
         self.add_frame.config(text="Update Printer")
 
     def delete_row(self, row_id):
-        """Delete a row from the Treeview and SQLite database."""
-        # Get the current values of the row
-        current_values = list(self.tree.item(row_id, "values"))
-        id = current_values[0]  # ID is the first column
-
-        # Delete from the SQLite database
-        conn = sqlite3.connect(self.db_path)
-        cursor = conn.cursor()
-        cursor.execute("DELETE FROM mapping_printer WHERE id = ?", (id,))
-        conn.commit()
-        conn.close()
-
-        # Delete from the Treeview
-        self.tree.delete(row_id)
+        values = self.tree.item(row_id)["values"]
+        if messagebox.askyesno("Confirm Delete", f"Are you sure you want to delete printer '{values[1]}'?"):
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM mapping_printer WHERE id = ?", (values[0],))
+            conn.commit()
+            conn.close()
+            self.list_device = self.fetch_data_from_db()
+            self.update_treeview()
 
     def save_edit(self, entry_edit, row_id, column_index):
         """Save the edited value to the Treeview and SQLite database."""
@@ -398,45 +371,56 @@ class SystemTrayApp:
 
     def refresh_list(self):
         """Refresh the list of mapping_printer every 1 minute."""
-        # Fetch the latest data from the database
-        self.list_device = self.fetch_data_from_db()
 
-        # Update the Treeview
-        self.update_treeview()
+        # Fetch the latest data from the database
+        def fetch():
+            self.list_device = self.fetch_data_from_db()
+            self.update_treeview()
+
+        threading.Thread(target=fetch).start()
 
         # Schedule the next refresh
-        self.root.after(10000, self.refresh_list)
+        self.root.after(5 * 60000, self.refresh_list)
 
     def refresh_status(self):
         """Refresh the status of the backend server."""
         if self.service_status:
-            import requests
+            def check_backend():
+                try:
+                    host = self.hostname_entry.get().strip()
+                    port = self.port_entry.get().strip()
+                    response = requests.get(f"http://{host}:{port}/health")
+                    if response.status_code == 200:
+                        self.update_service_status(True)
+                    else:
+                        self.update_service_status(False)
+                except requests.exceptions.RequestException:
+                    self.update_service_status(False)
 
-            try:
-                host = self.hostname_entry.get().strip()
-                port = self.port_entry.get().strip()
-                response = requests.get(f"http://{host}:{port}")
-                if response.status_code != 200:
-                    self.service_status = False
-                    self.service_button.config(text="Start Service")
-            except requests.exceptions.RequestException:
-                self.service_status = False
-                self.service_button.config(text="Start Service")
+            # Run backend check in a thread
+            threading.Thread(target=check_backend, daemon=True).start()
 
-        self.root.after(10000, self.refresh_status)
+        # Schedule next check in 5 minutes
+        self.root.after(5 * 60000, self.refresh_status)
+
+    def update_service_status(self, is_running):
+        """Safely update the service status and button text."""
+        self.service_status = is_running
+        self.service_button.config(text="Start Service" if not is_running else "Stop Service")
 
     def minimize_to_tray(self):
         """Minimize the window to the system tray."""
         self.root.withdraw()
         image = Image.open("app.ico")  # Ensure this file exists
         self.menu = (pystray.MenuItem('Show', self.show_window),
-                pystray.MenuItem('Quit', self.quit_window))
+                     pystray.MenuItem('Quit', self.quit_window))
         self.icon = pystray.Icon("name", image, "Ecalyptus Printer Manager", self.menu)
         self.icon.run()
 
     def quit_window(self, icon):
         """Stop the system tray icon and destroy the window."""
         icon.stop()
+        self.stop_backend()
         self.root.destroy()
 
     def show_window(self, icon):
@@ -448,7 +432,7 @@ class SystemTrayApp:
         """Stop the backend server."""
         if self.backend_process:
             self.backend_process.terminate()
-            subprocess.run(['taskkill', '/im', 'api.exe', '/f'])
+            subprocess.run(['taskkill', '/im', 'ecal-printer-api.exe', '/f'])
             self.backend_process = None
             self.service_status = False
             self.service_button.config(text="Start Service")
@@ -483,7 +467,7 @@ class SystemTrayApp:
                     )
                 else:
                     self.backend_process = subprocess.Popen(
-                        ["./api.exe", "--host", host, "--port", port],  # Pass host and port
+                        ["./ecal-printer-api.exe", "--host", host, "--port", port],  # Pass host and port
                         stdout=subprocess.PIPE,
                         stderr=subprocess.PIPE,
                     )
@@ -512,6 +496,7 @@ def start_frontend():
     else:
         messagebox.showwarning("Ecalyptus Printer Manager",
                                "The application is already running.")
+
 
 if __name__ == "__main__":
     start_frontend()

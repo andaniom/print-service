@@ -16,9 +16,9 @@ if exist "%DIST_PATH%" rmdir /s /q "%DIST_PATH%"
 
 :: Use PyInstaller to create the executable
 pip install -r requirement.txt
-pyinstaller --onefile -F api/api.py --clean --noconsole  
+pyinstaller --onefile -F api/api.py --add-data "print.exe:." --clean --noconsole --name "ecal-printer-api"
 echo Building the application view with PyInstaller...
-pyinstaller --onefile --add-data "dist/api.exe:." --add-data "view:view" --add-data "print.exe:." --add-data "app.ico:." --icon "app.ico" --noconsole --name "Ecalyptus Printer" main.py
+pyinstaller --onefile --add-data "dist/ecal-printer-api.exe:." --add-data "view:view" --add-data "app.ico:." --icon "app.ico" --noconsole --name "Ecalyptus Printer" main.py
 
 if %errorlevel% neq 0 (
     echo PyInstaller build failed!

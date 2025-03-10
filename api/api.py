@@ -1,14 +1,15 @@
-import json
 import time
-
 from fastapi import FastAPI, File, UploadFile, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel, ValidationError
 
 from api.logger import logger
 from api.services.file_service import save_file
-from api.services.queue_service import print_queue
+from api.services.queue_service import enqueue_eticket_job, enqueue_print_job, get_queue_status, shutdown_workers, \
+    initialize_workers
 
+# FastAPI app setup
 app = FastAPI()
 
 app.add_middleware(
@@ -19,49 +20,52 @@ app.add_middleware(
     allow_headers=["*"],  # Allows all headers
 )
 
+# Metadata validation
+class Metadata(BaseModel):
+    name: str
+    data: list
+
 @app.post("/print_eticket")
-async def add_to_queue(file: UploadFile = File(...), metadata: str = Form(...)):
+async def add_to_queue_eticket(file: UploadFile = File(...), metadata: str = Form(...)):
+    try:
+        metadata_json = Metadata.parse_raw(metadata)
+    except ValidationError as e:
+        logger.error(f"Invalid metadata: {e}")
+        return JSONResponse(content={"error": "Invalid metadata"}, status_code=400)
 
-    metadata_json = None
-    if metadata:
-        try:
-            metadata_json = json.loads(metadata)
-        except json.JSONDecodeError as e:
-            logger.error(f"Invalid metadata: {e}")
-    current_time_millis = int(round(time.time() * 1000))
-    filename = metadata_json['name'] + ".pdf"
-
+    filename = f"{metadata_json.name}.pdf"
     temp_file = save_file(file, filename)
-    print_queue.put((temp_file, None, metadata_json))
-    return JSONResponse(content={"message": "PDF added to print queue"})
+
+    enqueue_eticket_job(temp_file, metadata_json.dict())
+    return JSONResponse(content={"message": "PDF added to e-ticket print queue"})
 
 @app.post("/print")
-def print_single(file: UploadFile = File(...), key: str = Form(...)):
-    current_time_millis = int(round(time.time() * 1000))
-    filename = key + "_" + str(current_time_millis) + ".pdf"
+async def add_to_queue(file: UploadFile = File(...), key: str = Form(...)):
+    filename = f"{key}_{int(round(time.time() * 1000))}.pdf"
     temp_file = save_file(file, filename)
-    print_queue.put((temp_file, key, None))
+
+    enqueue_print_job(temp_file, key)
     return JSONResponse(content={"message": "PDF added to print queue"})
 
 @app.get("/")
 def index():
     return {"message": "Print Queue API"}
 
+@app.get("/queue_status")
+def queue_status():
+    return get_queue_status()
+
+@app.get("/health")
+def health_check():
+    return {"status": "healthy"}
+
 @app.on_event("shutdown")
 def shutdown():
-    print_queue.put(None)
-    logger.info("Shutting down the application")
+    shutdown_workers()
+
+# Initialize workers on startup
+initialize_workers()
 
 if __name__ == "__main__":
     import uvicorn
-    import multiprocessing
-    multiprocessing.freeze_support()  # For Windows support
-
-    import argparse
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--host", default="0.0.0.0")
-    parser.add_argument("--port", type=int, default=2212)
-    args = parser.parse_args()
-
-    uvicorn.run(app, host=args.host, port=args.port, reload=False, workers=1)
+    uvicorn.run(app, host="0.0.0.0", port=2212)

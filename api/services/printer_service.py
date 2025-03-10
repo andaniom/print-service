@@ -6,67 +6,85 @@ from pathlib import Path
 from api.repo.mapping_printer import get_mapping_printer_by_label
 
 def print_pdf(pdf_file: str, page_number: int, printer_label: str):
-    # Validate input
+    """
+    Prints a PDF file using PDFtoPrinter (print.exe) or 'lp' command, depending on the OS.
+
+    Args:
+        pdf_file (str): Path to the PDF file.
+        page_number (int): The page number to print.
+        printer_label (str): The label of the target printer.
+
+    Raises:
+        FileNotFoundError: If the PDF file does not exist.
+        ValueError: If the page number is invalid.
+        Exception: For unsupported OS or other subprocess-related issues.
+    """
+    # Get printer mapping by label
     mapping = get_mapping_printer_by_label(printer_label)
     if mapping is None:
-        logging.error(f"Label printer_label {printer_label} not found. Skipping print job.")
+        logging.error(f"Printer label '{printer_label}' not found. Skipping print job.")
         return
     printer_name = mapping[1]
+
+    # Validate PDF file
     pdf_path = Path(pdf_file)
     if not pdf_path.exists():
-        raise FileNotFoundError(f"The file {pdf_file} does not exist.")
+        raise FileNotFoundError(f"The file '{pdf_file}' does not exist.")
 
+    # Validate page number
     if not isinstance(page_number, int) or page_number < 1:
         raise ValueError("Page number must be a positive integer.")
 
-    if os.name == 'posix':  # Linux/Mac
+    # Linux/Mac printing
+    if os.name == 'posix':
         try:
-            # Use 'lp' command if available
             command = [
-                "lp",  # Command to print
-                "-o", f"page-ranges={page_number} queue={printer_name}",  # Specify the page range
-                pdf_file  # Specify the PDF file to print
+                "lp",
+                "-o", f"page-ranges={page_number}",
+                "-d", printer_name,
+                str(pdf_path)
             ]
-
-            # Log the command being executed
             logging.debug(f"Executing command: {' '.join(command)}")
-
-            # Run the command
             subprocess.run(command, check=True)
-        except Exception as e:
-            raise Exception(f"An error occurred while printing: {e}")
-    elif os.name == 'nt':  # Windows
+        except subprocess.SubprocessError as e:
+            raise Exception(f"An error occurred while printing on Linux/Mac: {e}")
+
+    # Windows printing using PDFtoPrinter (print.exe)
+    elif os.name == 'nt':
         try:
-            logging.info("print: windows")
-            exec_path = get_resource_path("print.exe")
-            logging.info(f"path exe: {exec_path}")
+            logging.info("Using Windows printing method.")
+            exec_path = get_resource_path("print.exe")  # Path to printer executable
+            logging.debug(f"Executable path: {exec_path}")
 
-            # command = [
-            #     exec_path,
-            #     '-print-to', printer_name,
-            #     '-silent',
-            #     '-print-settings', f'{page_number}, {orientation}',
-            #     pdf_file
-            # ]
-
-            command = f'"{exec_path}" "{pdf_file}" "{printer_name}" pages={page_number} /s'
+            # command: print specific pages to the printer
+            import shlex
+            command = f'"{exec_path}" {shlex.quote(pdf_file)} {shlex.quote(printer_name)} pages={page_number} /s'
 
             logging.info(f"Executing command: {command}")
 
-            try:
-                result = subprocess.run(command, capture_output=True, text=True)
+            result = subprocess.run(command, capture_output=True, text=True)
+            if result.returncode == 0:
                 logging.info(f"Print successful: {result.stdout}")
-            except subprocess.CalledProcessError as e:
-                logging.error(f"Print failed: {e.stderr}")
-            except PermissionError:
-                logging.error("Permission error: Please check file and user permissions.")
-        except Exception as e:
-            raise Exception(f"An error occurred while printing: {e}")
+            else:
+                logging.error(f"Print failed: {result.stderr}")
+        except PermissionError:
+            logging.error("Permission error: Check file and user permissions.")
+        except subprocess.SubprocessError as e:
+            raise Exception(f"An error occurred while printing on Windows: {e}")
+
     else:
         raise Exception("Unsupported operating system")
 
 
-def get_resource_path(relative_path):
-    """Get the absolute path to a bundled resource."""
+def get_resource_path(relative_path: str) -> str:
+    """
+    Get the absolute path to a bundled resource.
+
+    Args:
+        relative_path (str): The relative path to the resource.
+
+    Returns:
+        str: Absolute path to the resource.
+    """
     base_path = os.path.abspath(".")
     return os.path.join(base_path, relative_path)
