@@ -414,8 +414,8 @@ class SystemTrayApp:
         """
         Stops and restarts the backend service.
         """
-        self.stop_backend()
-        self.start_backend()
+        self.stop_backend(restart=True)
+        self.start_backend(restart=True)
 
     def update_service_status(self, is_running):
         """Safely update the service status and button text."""
