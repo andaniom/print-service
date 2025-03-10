@@ -139,7 +139,7 @@ class SystemTrayApp:
         self.create_add_printer_form(right_frame)
 
     def create_service_setting(self, parent):
-        self.service_frame = tk.LabelFrame(parent, text="Service Setting", padx=5, pady=5)
+        self.service_frame = tk.LabelFrame(parent, text="Service Setting", padx=5, pady=5, height=200)
         self.service_frame.pack(fill=tk.X, padx=5, pady=5)
 
         self.hostname_label = tk.Label(self.service_frame, text="Hostname")
@@ -157,8 +157,6 @@ class SystemTrayApp:
         # Add Start Service
         self.service_button = tk.Button(self.service_frame, text="Start Service", command=self.toggle_service)
         self.service_button.grid(row=2, column=1, padx=5, pady=5)
-
-        self.service_frame.grid_rowconfigure(3, minsize=38)
 
     def create_add_printer_form(self, parent):
         """Create a form to add a new printer."""
@@ -430,7 +428,7 @@ class SystemTrayApp:
 
     def stop_backend(self):
         """Stop the backend server."""
-        if self.backend_process:
+        if self.backend_process and self.backend_process.poll() is None:
             self.backend_process.terminate()
             subprocess.run(['taskkill', '/im', 'ecal-printer-api.exe', '/f'])
             self.backend_process = None
@@ -455,25 +453,32 @@ class SystemTrayApp:
             messagebox.showwarning("Input Error", "Please fill in all fields.")
             return
 
+        if not port.isdigit() or not (1 <= int(port) <= 65535):
+            messagebox.showwarning("Input Error", "Port must be a number between 1 and 65535.")
+            return
+
+        if self.backend_process and self.backend_process.poll() is None:
+            messagebox.showwarning("Service Running", "Backend is already running.")
+            return
+
         def run_server():
             try:
-                # Set the working directory to the project directory
-                import os
                 if Config.DEBUG:
                     project_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
                     self.backend_process = subprocess.Popen(
-                        ["uvicorn", "api.api:app", "--host", host, "--port", port],
-                        cwd=project_dir  # Set the working directory to the project directory
+                        ["uvicorn", "api.api:app", "--host", host, "--port", port, "--workers", "3"],
+                        cwd=project_dir,
                     )
                 else:
+                    exe_name = "ecal-printer-api.exe" if os.name == "nt" else "./ecal-printer-api"
                     self.backend_process = subprocess.Popen(
-                        ["./ecal-printer-api.exe", "--host", host, "--port", port],  # Pass host and port
+                        [exe_name, "--host", host, "--port", port, "--workers", "3"],
                         stdout=subprocess.PIPE,
                         stderr=subprocess.PIPE,
                     )
 
                 self.service_status = True
-                self.service_button.config(text="Stop Service")
+                self.update_service_button("Stop Service")
                 messagebox.showinfo("Backend Started", f"Backend server started at {host}:{port}")
             except Exception as e:
                 messagebox.showerror("Backend Error", f"Failed to start backend: {e}")
