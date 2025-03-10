@@ -65,8 +65,12 @@ def print_pdf(pdf_file: str, page_number: int, printer_label: str):
             result = subprocess.run(command, capture_output=True, text=True)
             if result.returncode == 0:
                 logging.info(f"Print successful: {result.stdout}")
-            else:
+            elif result.returncode == 1:
                 logging.error(f"Print failed: {result.stderr}")
+            elif result.returncode == 2:
+                logging.warning(f"Print failed: Print.exe is already running. Waiting for it to finish.")
+                while result.returncode == 2:
+                    result = subprocess.run(command, capture_output=True, text=True)
         except PermissionError:
             logging.error("Permission error: Check file and user permissions.")
         except subprocess.SubprocessError as e:
