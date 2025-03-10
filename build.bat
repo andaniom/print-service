@@ -3,7 +3,7 @@
 cls
 
 :: Set variables
-set "APP_NAME=Ecalyptus Printer"
+set "APP_NAME=Ecalyptus Printer Manager"
 set "APP_VERSION=1.0.0"
 set "DIST_PATH=dist"
 set "BUILD_PATH=build"
@@ -30,7 +30,7 @@ if %errorlevel% neq 0 (
 )
 
 echo Building the application view with PyInstaller...
-pyinstaller --onefile --add-data "dist/ecal-printer-api.exe:." --add-data "view:view" --add-data "app.ico:." --icon "app.ico" --noconsole --name "%APP_NAME% %APP_VERSION%" main.py
+pyinstaller --onefile --add-data "dist/ecal-printer-api.exe:." --add-data "view:view" --add-data "app.ico:." --icon "app.ico" --noconsole --name "%APP_NAME%" main.py
 if %errorlevel% neq 0 (
     echo View build failed!
     pause

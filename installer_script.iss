@@ -14,7 +14,7 @@ SetupIconFile=app.ico
 
 [Files]
 ; Include the PyInstaller executable
-Source: "dist\Ecalyptus Printer.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "dist\Ecalyptus Printer Manager.exe"; DestDir: "{app}"; Flags: ignoreversion
 ; Include additional files and folders
 Source: "app.ico"; DestDir: "{app}"; Flags: ignoreversion
 ; Include additional files and folders
@@ -28,10 +28,10 @@ Source: "print.exe"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
 ; Create a shortcut in the Start Menu
-Name: "{group}\Ecalyptus Printer"; Filename: "{app}\Ecalyptus Printer.exe"; IconFilename: "{app}\app.ico"
+Name: "{group}\Ecalyptus Printer Manager"; Filename: "{app}\Ecalyptus Printer Manager.exe"; IconFilename: "{app}\app.ico"
 ; Create a desktop shortcut (optional)
-Name: "{commondesktop}\Ecalyptus Printer"; Filename: "{app}\Ecalyptus Printer.exe"; IconFilename: "{app}\app.ico"
+Name: "{commondesktop}\Ecalyptus Printer Manager"; Filename: "{app}\Ecalyptus Printer Manager.exe"; IconFilename: "{app}\app.ico"
 
 [Run]
 ; Optionally run the application after installation
-Filename: "{app}\Ecalyptus Printer.exe"; Description: "Run Ecalyptus Printer"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\Ecalyptus Printer Manager.exe"; Description: "Run Ecalyptus Printer Manager"; Flags: nowait postinstall skipifsilent
