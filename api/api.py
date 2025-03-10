@@ -60,9 +60,9 @@ def queue_status():
 def health_check():
     return {"status": "healthy"}
 
-@app.on_event("shutdown")
-def shutdown():
-    shutdown_workers()
+# @app.on_event("shutdown")
+# def shutdown():
+#     shutdown_workers()
 
 # Initialize workers on startup
 initialize_workers()

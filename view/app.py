@@ -392,9 +392,11 @@ class SystemTrayApp:
                     if response.status_code == 200:
                         self.update_service_status(True)
                     else:
-                        self.update_service_status(False)
+                        self.stop_backend()
+                        self.start_backend()
                 except requests.exceptions.RequestException:
-                    self.update_service_status(False)
+                    self.stop_backend()
+                    self.start_backend()
 
             # Run backend check in a thread
             threading.Thread(target=check_backend, daemon=True).start()
