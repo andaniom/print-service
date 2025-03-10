@@ -1,37 +1,45 @@
 [Setup]
 AppPublisher=Ecalyptus
 AppPublisherURL=http://www.ecalyptus.healthcare
-AppName=Ecalyptus Printer
+AppName=Ecalyptus Printer Manager
 AppVersion=1.0
-DefaultDirName={pf}\Ecalyptus Printer
-DefaultGroupName=Ecalyptus Printer
+DefaultDirName={pf}\Ecalyptus Printer Manager
+DefaultGroupName=Ecalyptus Printer Manager
 OutputDir=.
 OutputBaseFilename=EcalyptusPrinterInstaller
 Compression=lzma2
 SolidCompression=yes
 UninstallDisplayIcon={app}\app.ico
 SetupIconFile=app.ico
+DisableProgramGroupPage=yes
+LicenseFile=license.txt ; Optional: Add a license agreement file.
 
 [Files]
-; Include the PyInstaller executable
+; Include the main executable
 Source: "dist\Ecalyptus Printer Manager.exe"; DestDir: "{app}"; Flags: ignoreversion
-; Include additional files and folders
+; Include additional files
 Source: "app.ico"; DestDir: "{app}"; Flags: ignoreversion
-; Include additional files and folders
 Source: "local.db"; DestDir: "{app}"; Flags: ignoreversion
-; Include additional files and folders
-Source: "dist/ecal-printer-api.exe"; DestDir: "{app}"; Flags: ignoreversion
-; Include additional files and folders
+Source: "dist\ecal-printer-api.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "backend.log"; DestDir: "{app}"; Flags: ignoreversion
-; Include additional files and folders
 Source: "print.exe"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
-; Create a shortcut in the Start Menu
+; Start Menu shortcut
 Name: "{group}\Ecalyptus Printer Manager"; Filename: "{app}\Ecalyptus Printer Manager.exe"; IconFilename: "{app}\app.ico"
-; Create a desktop shortcut (optional)
+; Desktop shortcut
 Name: "{commondesktop}\Ecalyptus Printer Manager"; Filename: "{app}\Ecalyptus Printer Manager.exe"; IconFilename: "{app}\app.ico"
 
 [Run]
-; Optionally run the application after installation
+; Run the application after installation
 Filename: "{app}\Ecalyptus Printer Manager.exe"; Description: "Run Ecalyptus Printer Manager"; Flags: nowait postinstall skipifsilent
+
+[Registry]
+; Add to startup (optional)
+Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; \
+      ValueType: string; ValueName: "EcalyptusPrinterManager"; \
+      ValueData: "{app}\Ecalyptus Printer Manager.exe"; Flags: uninsdeletevalue
+
+[UninstallDelete]
+; Remove local.db on uninstallation
+Type: files; Name: "{app}\local.db"

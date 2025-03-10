@@ -428,7 +428,7 @@ class SystemTrayApp:
 
     def stop_backend(self):
         """Stop the backend server."""
-        if self.backend_process and self.backend_process.poll() is None:
+        if self.backend_process:
             self.backend_process.terminate()
             subprocess.run(['taskkill', '/im', 'ecal-printer-api.exe', '/f'])
             self.backend_process = None
