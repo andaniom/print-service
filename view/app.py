@@ -407,8 +407,8 @@ class SystemTrayApp:
             # Run backend check in a thread
             threading.Thread(target=check_backend, daemon=True).start()
 
-        # Schedule next check in 1 minutes
-        self.root.after(60000, self.refresh_status)
+        # Schedule next check in 10 seconds
+        self.root.after(10000, self.refresh_status)
 
     def restart_backend(self):
         """
@@ -442,7 +442,7 @@ class SystemTrayApp:
         icon.stop()
         self.root.after(0, self.root.deiconify)
 
-    def stop_backend(self):
+    def stop_backend(self, restart=False):
         """Stop the backend server."""
         if self.backend_process:
             self.backend_process.terminate()
@@ -451,7 +451,8 @@ class SystemTrayApp:
             self.backend_process = None
             self.service_status = False
             self.service_button.config(text="Start Service")
-            messagebox.showinfo("Backend Stopped", "Backend server stopped.")
+            if not restart:
+                messagebox.showinfo("Backend Stopped", "Backend server stopped.")
 
     def toggle_service(self):
         """Start or stop the backend service."""
@@ -461,7 +462,7 @@ class SystemTrayApp:
             self.stop_backend()
             self.start_backend()
 
-    def start_backend(self):
+    def start_backend(self, restart=False):
         """Start the backend server in a separate thread."""
         host = self.hostname_entry.get().strip()
         port = self.port_entry.get().strip()
@@ -496,7 +497,8 @@ class SystemTrayApp:
 
                 self.service_status = True
                 self.service_button.config(text="Stop Service")
-                messagebox.showinfo("Backend Started", f"Backend server started at {host}:{port}")
+                if not restart:
+                    messagebox.showinfo("Backend Started", f"Backend server started at {host}:{port}")
             except Exception as e:
                 messagebox.showerror("Backend Error", f"Failed to start backend: {e}")
 
