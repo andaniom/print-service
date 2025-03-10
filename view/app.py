@@ -478,7 +478,7 @@ class SystemTrayApp:
                     )
 
                 self.service_status = True
-                self.service_button("Stop Service")
+                self.service_button.config(text="Stop Service")
                 messagebox.showinfo("Backend Started", f"Backend server started at {host}:{port}")
             except Exception as e:
                 messagebox.showerror("Backend Error", f"Failed to start backend: {e}")
