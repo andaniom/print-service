@@ -8,7 +8,8 @@ from api.logger import logger
 
 
 def save_file(uploaded_file: UploadFile, filename: str):
-    temp_dir = Path("/tmp/uploads")
+    project_dir = Path(__file__).resolve().parent
+    temp_dir = project_dir / "tmp/uploads"
     temp_dir.mkdir(parents=True, exist_ok=True)
     file_path = temp_dir / filename
     with open(file_path, "wb") as f:
