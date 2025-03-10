@@ -4,82 +4,77 @@ from queue import Queue
 from api.logger import logger
 from api.services.printer_service import print_pdf
 
-# Queues
-print_queue = Queue(maxsize=1000)
-print_queue_eticket = Queue(maxsize=1000)
-
-# Worker threads
-threads = []
-
-# Worker functions
-def process_queue_item(item):
-    pdf_file, key = item
-    if not pdf_file:
-        return
-    try:
-        logger.info(f"Processing print job for {pdf_file} with key {key}")
-        printer_label = key
-        print_pdf(pdf_file, 1, printer_label)
-    except Exception as e:
-        logger.error(f"Failed to print {pdf_file}: {e}")
-
-def process_queue_item_eticket(item):
-    pdf_file, metadata_json = item
-    if not pdf_file:
-        return
-    try:
-        logger.info(f"Processing e-ticket print job for {pdf_file} with metadata {metadata_json}")
-        for entry in metadata_json['data']:
-            printer_label = entry['printer']
-            page_number = entry['page']
-            print_pdf(pdf_file, page_number, printer_label)
-    except Exception as e:
-        logger.error(f"Failed to print e-ticket {pdf_file}: {e}")
-
-# Worker thread logic
-def worker(queue, process_function):
-    while True:
-        item = queue.get()
-        if item is None:  # Shutdown signal
-            logger.info("Worker received shutdown signal.")
-            break
+class PrintJobQueue:
+    def __init__(self, maxsize=2000):
+        self.queue = Queue(maxsize=maxsize)
+        self.worker_thread = threading.Thread(target=self.worker, daemon=True)
+    
+    def process_queue_item(self, item):
+        pdf_file, job_type, data = item
+        if not pdf_file:
+            return
         try:
-            process_function(item)
-        finally:
-            queue.task_done()
+            if job_type == "print":
+                logger.info(f"Processing print job for {pdf_file} with key {data}")
+                self._print_pdf(pdf_file, 1, data)
+            elif job_type == "eticket":
+                logger.info(f"Processing e-ticket print job for {pdf_file} with metadata {data}")
+                for entry in data['data']:
+                    self._print_pdf(pdf_file, entry['page'], entry['printer'])
+        except Exception as e:
+            logger.error(f"Failed to print {pdf_file}: {e}")
+
+    def _print_pdf(self, pdf_file, page_number, printer_label):
+        print_pdf(pdf_file, page_number, printer_label)
+
+    def worker(self):
+        while True:
+            item = self.queue.get()
+            if item is None:  # Shutdown signal
+                logger.info("Worker received shutdown signal.")
+                break
+            try:
+                self.process_queue_item(item)
+            finally:
+                self.queue.task_done()
+
+    def start(self):
+        logger.info("Initializing workers...")
+        self.worker_thread.start()
+
+    def enqueue_print_job(self, pdf_file, key):
+        self.queue.put((pdf_file, "print", key))
+        logger.info(f"Added job to print queue: {pdf_file}")
+
+    def enqueue_eticket_job(self, pdf_file, metadata_json):
+        self.queue.put((pdf_file, "eticket", metadata_json))
+        logger.info(f"Added job to e-ticket queue: {pdf_file}")
+
+    def get_queue_status(self):
+        return {
+            "print_queue_size": self.queue.qsize(),
+        }
+
+    def shutdown(self):
+        logger.info("Shutting down workers...")
+        self.queue.put(None)
+        self.worker_thread.join()
+        logger.info("All workers have shut down.")
 
 # Public functions
-def initialize_workers():
-    global threads
-    logger.info("Initializing workers...")
-    for _ in range(2):  # Workers for print queue
-        t = threading.Thread(target=worker, args=(print_queue, process_queue_item), daemon=True)
-        t.start()
-        threads.append(t)
+print_job_queue = PrintJobQueue()
 
-    for _ in range(2):  # Workers for e-ticket queue
-        t = threading.Thread(target=worker, args=(print_queue_eticket, process_queue_item_eticket), daemon=True)
-        t.start()
-        threads.append(t)
+def initialize_workers():
+    print_job_queue.start()
 
 def enqueue_print_job(pdf_file, key):
-    print_queue.put((pdf_file, key))
-    logger.info(f"Added job to print queue: {pdf_file}")
+    print_job_queue.enqueue_print_job(pdf_file, key)
 
 def enqueue_eticket_job(pdf_file, metadata_json):
-    print_queue_eticket.put((pdf_file, metadata_json))
-    logger.info(f"Added job to e-ticket queue: {pdf_file}")
+    print_job_queue.enqueue_eticket_job(pdf_file, metadata_json)
 
 def get_queue_status():
-    return {
-        "print_queue_size": print_queue.qsize(),
-        "eticket_queue_size": print_queue_eticket.qsize(),
-    }
+    return print_job_queue.get_queue_status()
 
 def shutdown_workers():
-    logger.info("Shutting down workers...")
-    print_queue.put(None)
-    print_queue_eticket.put(None)
-    for thread in threads:
-        thread.join(timeout=10)
-    logger.info("All workers have shut down.")
+    print_job_queue.shutdown()
