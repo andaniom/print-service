@@ -12,7 +12,7 @@ SolidCompression=yes
 UninstallDisplayIcon={app}\app.ico
 SetupIconFile=app.ico
 DisableProgramGroupPage=yes
-LicenseFile=license.txt ; Optional: Add a license agreement file.
+LicenseFile=license.txt
 
 [Files]
 ; Include the main executable
