@@ -20,7 +20,7 @@ Source: "app.ico"; DestDir: "{app}"; Flags: ignoreversion
 ; Include additional files and folders
 Source: "local.db"; DestDir: "{app}"; Flags: ignoreversion
 ; Include additional files and folders
-Source: "dist/api.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "dist/ecal-printer-api.exe"; DestDir: "{app}"; Flags: ignoreversion
 ; Include additional files and folders
 Source: "backend.log"; DestDir: "{app}"; Flags: ignoreversion
 ; Include additional files and folders
