@@ -407,8 +407,8 @@ class SystemTrayApp:
             # Run backend check in a thread
             threading.Thread(target=check_backend, daemon=True).start()
 
-        # Schedule next check in 10 seconds
-        self.root.after(10000, self.refresh_status)
+        # Schedule next check in 5 seconds
+        self.root.after(5000, self.refresh_status)
 
     def restart_backend(self):
         """
