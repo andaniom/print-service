@@ -11,7 +11,6 @@ import pystray
 import requests
 from PIL import Image
 
-from api.services.queue_service import worker
 from view.config import Config
 
 
