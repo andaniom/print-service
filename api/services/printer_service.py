@@ -71,6 +71,8 @@ def print_pdf(pdf_file: str, page_number: int, printer_label: str):
             logging.error("Permission error: Check file and user permissions.")
         except subprocess.SubprocessError as e:
             raise Exception(f"An error occurred while printing on Windows: {e}")
+        except Exception as e:
+            raise Exception(f"An error occurred while printing on Windows: {e}")
 
     else:
         raise Exception("Unsupported operating system")

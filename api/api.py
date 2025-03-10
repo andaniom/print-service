@@ -1,6 +1,5 @@
 import time
 
-import argparse
 from fastapi import FastAPI, File, UploadFile, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -75,7 +74,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-p", "--port", type=int, default=2212, help="Port to listen to")
     parser.add_argument("-H", "--host", default="0.0.0.0", help="Host to listen to")
-    parser.add_argument("-w", "--workers", type=int, default=1, help="Number of workers")
     args = parser.parse_args()
 
     logger.info(f"Starting API on {args.host}:{args.port}")
