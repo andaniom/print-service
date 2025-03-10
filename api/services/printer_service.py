@@ -68,7 +68,7 @@ def print_pdf(pdf_file: str, page_number: int, printer_label: str):
             elif result.returncode == 1:
                 logging.error(f"Print failed: {result.stderr}")
             elif result.returncode == 2:
-                logging.warning(f"Print failed: Print.exe is already running. Waiting for it to finish.")
+                logging.error(f"Print failed: Print.exe is already running. Waiting for it to finish.")
                 while result.returncode == 2:
                     result = subprocess.run(command, capture_output=True, text=True)
         except PermissionError:
