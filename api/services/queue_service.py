@@ -5,8 +5,8 @@ from api.logger import logger
 from api.services.printer_service import print_pdf
 
 # Queues
-print_queue = Queue()
-print_queue_eticket = Queue()
+print_queue = Queue(maxsize=1000)
+print_queue_eticket = Queue(maxsize=1000)
 
 # Worker threads
 threads = []
