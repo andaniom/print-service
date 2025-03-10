@@ -8,17 +8,6 @@ set "APP_VERSION=1.0.0"
 set "DIST_PATH=dist"
 set "BUILD_PATH=build"
 set "INSTALLER_SCRIPT=installer_script.iss"
-set "SIGNTOOL_PATH=C:\Program Files (x86)\Windows Kits\10\bin\x64\signtool.exe"
-set "INNO_SETUP_PATH=C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
-
-:: Function to check error level and exit if failed
-:check_error
-if %errorlevel% neq 0 (
-    echo Error occurred. Exiting with code %errorlevel%.
-    pause
-    exit /b %errorlevel%
-)
-goto :eof
 
 echo Cleaning previous builds...
 if exist "%BUILD_PATH%" rmdir /s /q "%BUILD_PATH%"
@@ -26,34 +15,41 @@ if exist "%DIST_PATH%" rmdir /s /q "%DIST_PATH%"
 
 echo Installing dependencies...
 pip install -r requirement.txt
-call :check_error
+if %errorlevel% neq 0 (
+    echo Failed to install dependencies!
+    pause
+    exit /b %errorlevel%
+)
 
 echo Building the application API with PyInstaller...
-pyinstaller --onefile --version-file=version_info.txt -F api/api.py --add-data "print.exe:." --clean --noconsole --name "ecal-printer-api"
-call :check_error
+pyinstaller --onefile -F api/api.py --add-data "print.exe:." --clean --noconsole --name "ecal-printer-api"
+if %errorlevel% neq 0 (
+    echo API build failed!
+    pause
+    exit /b %errorlevel%
+)
 
 echo Building the application view with PyInstaller...
-pyinstaller --onefile --version-file=version_info.txt --add-data "dist/ecal-printer-api.exe:." --add-data "view:view" --add-data "app.ico:." --icon "app.ico" --noconsole --name "%APP_NAME%" main.py
-call :check_error
-
-echo Signing the application...
-if not exist "%SIGNTOOL_PATH%" (
-    echo SignTool not found at "%SIGNTOOL_PATH%".
+pyinstaller --onefile --add-data "dist/ecal-printer-api.exe:." --add-data "view:view" --add-data "app.ico:." --icon "app.ico" --noconsole --name "%APP_NAME%" main.py
+if %errorlevel% neq 0 (
+    echo View build failed!
     pause
-    exit /b 1
+    exit /b %errorlevel%
 )
-"%SIGNTOOL_PATH%" sign /a /tr http://timestamp.digicert.com /td sha256 /fd sha256 /d "%APP_NAME%" /du "http://www.ecalyptus.healthcare" /n "Ecalyptus" "%DIST_PATH%\ecal-printer-api.exe"
-call :check_error
+
 
 echo Creating the installer with Inno Setup...
-if not exist "%INNO_SETUP_PATH%" (
-    echo Inno Setup not found at "%INNO_SETUP_PATH%".
+if not exist "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" (
+    echo Inno Setup not found!
     pause
     exit /b 1
 )
-"%INNO_SETUP_PATH%" "%INSTALLER_SCRIPT%"
-call :check_error
+"C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "%INSTALLER_SCRIPT%"
+if %errorlevel% neq 0 (
+    echo Inno Setup build failed!
+    pause
+    exit /b %errorlevel%
+)
 
 echo Build and installer creation succeeded!
 pause
-exit /b 0
