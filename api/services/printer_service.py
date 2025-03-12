@@ -57,7 +57,8 @@ def print_pdf(pdf_file: str, page_number: int, printer_label: str):
             logging.debug(f"Executable path: {exec_path}")
 
             # command: print specific pages to the printer
-            command = f'"{exec_path}" "{pdf_file}" "{printer_name}" pages={page_number} /s'
+            # command = f'"{exec_path}" "{pdf_file}" "{printer_name}" pages={page_number} /s'
+            command = '"{}" -query "{}"'.format(exec_path, pdf_file)
 
             logging.info(f"Executing command: {command}")
 
