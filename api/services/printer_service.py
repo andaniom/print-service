@@ -53,13 +53,22 @@ def print_pdf(pdf_file: str, page_number: int, printer_label: str):
     elif os.name == 'nt':
         try:
             logging.info("Using Windows printing method.")
-            exec_path = get_resource_path("print.exe")  # Path to printer executable
-            logging.debug(f"Executable path: {exec_path}")
+            # exec_path = get_resource_path("print.exe")  # Path to printer executable
+            # logging.debug(f"Executable path: {exec_path}")
+            #
+            # # command: print specific pages to the printer
+            # command = f'"{exec_path}" "{pdf_file}" "{printer_name}" pages={page_number} /s'
 
-            # command: print specific pages to the printer
-            command = f'"{exec_path}" "{pdf_file}" "{printer_name}" pages={page_number} /s'
+            gs_print_path = get_resource_path("\GSPRINT\gsprint.exe")
+            gs_path = get_resource_path("\GHOSTSCRIPT\bin\gswin32c.exe")
+            logging.debug(f"Executable path: {gs_print_path} {gs_path}")
 
-            logging.info(f"Executing command: {command}")
+            page_range_options = f"-from={page_number} -to={page_number}"
+
+            # Construct the command to print the PDF
+            command = f'"{gs_print_path}" -ghostscript "{gs_path}" -printer "{printer_name}" {page_range_options} -quiet "{pdf_file}"'
+
+            logging.debug(f"Executing command: {command}")
 
             result = subprocess.run(command, capture_output=True, text=True)
             if result.returncode == 0:
