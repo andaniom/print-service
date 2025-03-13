@@ -23,6 +23,8 @@ Source: "local.db"; DestDir: "{app}"; Flags: ignoreversion
 Source: "dist\ecal-printer-api.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "backend.log"; DestDir: "{app}"; Flags: ignoreversion
 Source: "print.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "GSPRINT\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "GHOSTSCRIPT\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
 ; Start Menu shortcut

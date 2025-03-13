@@ -22,7 +22,7 @@ if %errorlevel% neq 0 (
 )
 
 echo Building the application API with PyInstaller...
-pyinstaller --onefile -F api/api.py --add-data "print.exe:." --clean --noconsole --name "ecal-printer-api"
+pyinstaller --onefile -F api/api.py --clean --noconsole --name "ecal-printer-api"
 if %errorlevel% neq 0 (
     echo API build failed!
     pause
