@@ -26,6 +26,7 @@ Source: "print.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "GSPRINT\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "GHOSTSCRIPT\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
+
 [Icons]
 ; Start Menu shortcut
 Name: "{group}\Ecalyptus Printer Manager"; Filename: "{app}\Ecalyptus Printer Manager.exe"; IconFilename: "{app}\app.ico"
