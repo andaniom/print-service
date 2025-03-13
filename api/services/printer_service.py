@@ -59,8 +59,8 @@ def print_pdf(pdf_file: str, page_number: int, printer_label: str):
             # # command: print specific pages to the printer
             # command = f'"{exec_path}" "{pdf_file}" "{printer_name}" pages={page_number} /s'
 
-            gs_print_path = get_resource_path("\GSPRINT\gsprint.exe")
-            gs_path = get_resource_path("\GHOSTSCRIPT\gswin32c.exe")
+            gs_print_path = get_resource_path("GSPRINT\gsprint.exe")
+            gs_path = get_resource_path("GHOSTSCRIPT\gswin32c.exe")
             logging.debug(f"Executable path: {gs_print_path} {gs_path}")
 
             page_range_options = f"-from {page_number} -to {page_number}"
