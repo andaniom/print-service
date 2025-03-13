@@ -2,8 +2,7 @@ import threading
 from queue import Queue
 
 from api.logger import logger
-from api.services.printer_service import print_pdf, print_image
-from api.utils.pdf_util import convert_pdf_to_images
+from api.services.printer_service import print_pdf
 
 
 class PrintJobQueue:
@@ -24,15 +23,10 @@ class PrintJobQueue:
                 for entry in data['data']:
                     self._print_pdf(pdf_file, entry['page'], entry['printer'])
         except Exception as e:
-            logger.error(f"Failed to print queue {pdf_file}: {e}")
+            logger.error(f"Failed to print {pdf_file}: {e}")
 
     def _print_pdf(self, pdf_file, page_number, printer_label):
-        images = convert_pdf_to_images(pdf_file)
-        if 1 <= page_number <= len(images):
-            print_image(images[page_number - 1], printer_label)
-        else:
-            logger.error(f"Page number {page_number} is out of range for {pdf_file}")
-        # print_pdf(pdf_file, page_number, printer_label)
+        print_pdf(pdf_file, page_number, printer_label)
 
     def worker(self):
         while True:
