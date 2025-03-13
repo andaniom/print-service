@@ -10,7 +10,7 @@ class PrintJobQueue:
     def __init__(self, maxsize=2000):
         self.queue = Queue(maxsize=maxsize)
         self.worker_thread = threading.Thread(target=self.worker, daemon=True)
-    
+
     def process_queue_item(self, item):
         pdf_file, job_type, data = item
         if not pdf_file:
@@ -24,11 +24,14 @@ class PrintJobQueue:
                 for entry in data['data']:
                     self._print_pdf(pdf_file, entry['page'], entry['printer'])
         except Exception as e:
-            logger.error(f"Failed to print {pdf_file}: {e}")
+            logger.error(f"Failed to print queue {pdf_file}: {e}")
 
     def _print_pdf(self, pdf_file, page_number, printer_label):
         images = convert_pdf_to_images(pdf_file)
-        print_image(images[page_number-1], printer_label)
+        if 1 <= page_number <= len(images):
+            print_image(images[page_number - 1], printer_label)
+        else:
+            logger.error(f"Page number {page_number} is out of range for {pdf_file}")
         # print_pdf(pdf_file, page_number, printer_label)
 
     def worker(self):
@@ -65,20 +68,26 @@ class PrintJobQueue:
         self.worker_thread.join()
         logger.info("All workers have shut down.")
 
+
 # Public functions
 print_job_queue = PrintJobQueue()
+
 
 def initialize_workers():
     print_job_queue.start()
 
+
 def enqueue_print_job(pdf_file, key):
     print_job_queue.enqueue_print_job(pdf_file, key)
+
 
 def enqueue_eticket_job(pdf_file, metadata_json):
     print_job_queue.enqueue_eticket_job(pdf_file, metadata_json)
 
+
 def get_queue_status():
     return print_job_queue.get_queue_status()
+
 
 def shutdown_workers():
     print_job_queue.shutdown()
