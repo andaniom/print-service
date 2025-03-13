@@ -60,15 +60,15 @@ def print_pdf(pdf_file: str, page_number: int, printer_label: str):
             # command = f'"{exec_path}" "{pdf_file}" "{printer_name}" pages={page_number} /s'
 
             gs_print_path = get_resource_path("\GSPRINT\gsprint.exe")
-            gs_path = get_resource_path("\GHOSTSCRIPT\bin\gswin32c.exe")
+            gs_path = get_resource_path("\GHOSTSCRIPT\gswin32c.exe")
             logging.debug(f"Executable path: {gs_print_path} {gs_path}")
 
-            page_range_options = f"-from={page_number} -to={page_number}"
+            page_range_options = f"-from {page_number} -to {page_number}"
 
             # Construct the command to print the PDF
             command = f'"{gs_print_path}" -ghostscript "{gs_path}" -printer "{printer_name}" {page_range_options} -quiet "{pdf_file}"'
 
-            logging.debug(f"Executing command: {command}")
+            logging.info(f"Executing command: {command}")
 
             result = subprocess.run(command, capture_output=True, text=True)
             if result.returncode == 0:
