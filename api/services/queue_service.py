@@ -2,7 +2,9 @@ import threading
 from queue import Queue
 
 from api.logger import logger
-from api.services.printer_service import print_pdf
+from api.services.printer_service import print_pdf, print_image
+from api.utils.pdf_util import convert_pdf_to_images
+
 
 class PrintJobQueue:
     def __init__(self, maxsize=2000):
@@ -25,7 +27,9 @@ class PrintJobQueue:
             logger.error(f"Failed to print {pdf_file}: {e}")
 
     def _print_pdf(self, pdf_file, page_number, printer_label):
-        print_pdf(pdf_file, page_number, printer_label)
+        images = convert_pdf_to_images(pdf_file)
+        print_image(images[page_number-1], printer_label)
+        # print_pdf(pdf_file, page_number, printer_label)
 
     def worker(self):
         while True:

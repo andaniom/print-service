@@ -3,7 +3,41 @@ import os
 import subprocess
 from pathlib import Path
 
+from escpos.printer import Usb
+
 from api.repo.mapping_printer import get_mapping_printer_by_label
+
+def initialize_printer(vendor_id, product_id):
+    try:
+        printer = Usb(int(vendor_id, 16), int(product_id, 16))
+        logging.info("Printer initialized successfully.")
+        return printer
+    except Exception as e:
+        logging.error(f"Failed to initialize printer: {e}")
+        return None
+
+def print_image(image, label):
+    try:
+        mapping = get_mapping_printer_by_label(label)
+        if mapping is None:
+            logging.error(f"Printer label '{label}' not found. Skipping print job.")
+            return
+        printer_name = mapping[1]
+        result = printer_name.split(',')
+        printer = initialize_printer(result[0], result[1])
+
+        if printer is None:
+            raise Exception("Printer not found")
+
+        printer.image(image)
+        printer.text("\n")
+        printer.close()
+
+
+        printer.cut()
+        logging.info(f"Printed: {label}")
+    except Exception as e:
+        logging.error(f"Failed to print {label}: {e}")
 
 def print_pdf(pdf_file: str, page_number: int, printer_label: str):
     """
@@ -53,12 +87,16 @@ def print_pdf(pdf_file: str, page_number: int, printer_label: str):
     elif os.name == 'nt':
         try:
             logging.info("Using Windows printing method.")
-            exec_path = get_resource_path("print.exe")  # Path to printer executable
-            logging.debug(f"Executable path: {exec_path}")
+            gs_print_path = get_resource_path("\GSPRINT\gsprint.exe")
+            gs_path = get_resource_path("\GHOSTSCRIPT\bin\gswin32.exe")
+            logging.debug(f"Executable path: {gs_print_path} {gs_path}")
 
             # command: print specific pages to the printer
             # command = f'"{exec_path}" "{pdf_file}" "{printer_name}" pages={page_number} /s'
-            command = '"{}" -query "{}"'.format(exec_path, pdf_file)
+            page_range_options = f"-dFirstPage={page_number} -dLastPage={page_number}"
+
+            # Construct the command to print the PDF
+            command = f'"{gs_print_path}" -ghostscript "{gs_path}" -printer "{printer_name}" {page_range_options} -quiet "{pdf_file}"'
 
             logging.info(f"Executing command: {command}")
 
