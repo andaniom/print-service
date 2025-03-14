@@ -14,7 +14,7 @@ if exist "%BUILD_PATH%" rmdir /s /q "%BUILD_PATH%"
 if exist "%DIST_PATH%" rmdir /s /q "%DIST_PATH%"
 
 echo Installing dependencies...
-pip install -r requirement.txt
+pip install -r requirements.txt
 if %errorlevel% neq 0 (
     echo Failed to install dependencies!
     pause
