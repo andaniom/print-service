@@ -4,7 +4,7 @@ cls
 
 :: Set application variables
 set "APP_NAME=Ecalyptus Printer Manager"
-set "APP_VERSION=1.0.0"
+set "APP_VERSION=1.0.1"
 set "DIST_PATH=dist"
 set "BUILD_PATH=build"
 set "INSTALLER_SCRIPT=installer_script.iss"
