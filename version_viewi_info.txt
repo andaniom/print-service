@@ -17,11 +17,11 @@ VSVersionInfo(
                 u'040904b0',
                 [StringStruct(u'CompanyName', u'Ecalyptus'),
                  StringStruct(u'FileDescription', u'Ecalyptus Printer Manager'),
-                 StringStruct(u'FileVersion', u'1.0.0'),
+                 StringStruct(u'FileVersion', u'1.0.1'),
                  StringStruct(u'InternalName', u'Ecalyptus Printer Manager'),
                  StringStruct(u'OriginalFilename', u'Ecalyptus Printer Manager.exe'),
                  StringStruct(u'ProductName', u'Ecalyptus Printer Manager'),
-                 StringStruct(u'ProductVersion', u'1.0.0')])
+                 StringStruct(u'ProductVersion', u'1.0.1')])
             ]),
         VarFileInfo([VarStruct(u'Translation', [1033, 1200])])
     ]

@@ -17,11 +17,11 @@ VSVersionInfo(
                 u'040904b0',
                 [StringStruct(u'CompanyName', u'Ecalyptus'),
                  StringStruct(u'FileDescription', u'ecal-printer-api'),
-                 StringStruct(u'FileVersion', u'1.0.0'),
+                 StringStruct(u'FileVersion', u'1.0.1'),
                  StringStruct(u'InternalName', u'ecal-printer-api'),
                  StringStruct(u'OriginalFilename', u'ecal-printer-api.exe'),
                  StringStruct(u'ProductName', u'ecal-printer-api'),
-                 StringStruct(u'ProductVersion', u'1.0.0')])
+                 StringStruct(u'ProductVersion', u'1.0.1')])
             ]),
         VarFileInfo([VarStruct(u'Translation', [1033, 1200])])
     ]

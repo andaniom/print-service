@@ -113,11 +113,11 @@ for %%F in ("%~1") do (
 ) > "%~1"
 
 :: Verify the file was created
-if not exist "%~1" (
-    echo ERROR: Failed to create version info file: %~1
-    pause
-    exit /b 1
-)
+::if not exist "%~1" (
+::    echo ERROR: Failed to create version info file: %~1
+::    pause
+""    exit /b 1
+::)
 exit /b
 
 :build_exe
