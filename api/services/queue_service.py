@@ -1,3 +1,4 @@
+import os
 import threading
 from queue import Queue
 
@@ -24,6 +25,12 @@ class PrintJobQueue:
                     self._print_pdf(pdf_file, entry['page'], entry['printer'])
         except Exception as e:
             logger.error(f"Failed to print {pdf_file}: {e}")
+        finally:
+            logger.info(f"Finished processing {pdf_file}")
+            try:
+                os.remove(pdf_file)
+            except OSError as e:
+                logger.error(f"Failed to delete {pdf_file}: {e}")
 
     def _print_pdf(self, pdf_file, page_number, printer_label):
         print_pdf(pdf_file, page_number, printer_label)

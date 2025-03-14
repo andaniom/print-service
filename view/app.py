@@ -447,7 +447,7 @@ class SystemTrayApp:
         if self.backend_process:
             self.backend_process.terminate()
             if os.name == 'nt':
-                subprocess.run(['taskkill', '/im', 'ecal-printer-api.exe', '/f'])
+                subprocess.run(['taskkill', '/im', 'ecal-printer-api.exe', '/f'], creationflags=subprocess.CREATE_NO_WINDOW)
             self.backend_process = None
             self.service_status = False
             self.service_button.config(text="Start Service")
