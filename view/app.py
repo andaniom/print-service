@@ -17,6 +17,7 @@ from view.config import Config
 class SystemTrayApp:
 
     def __init__(self, root):
+        self.version = "1.0.1"
         self.icon = None
         self.menu = None
         self.header_frame = None
@@ -32,7 +33,7 @@ class SystemTrayApp:
         self.hostname_label = None
         self.root = root
         self.root.configure(bg="#FFFFFF")
-        self.root.title("Ecalyptus Printer Manager")
+        self.root.title("Ecalyptus Printer Manager" + " " + self.version)
         self.root.geometry('600x650')
         self.root.protocol('WM_DELETE_WINDOW', self.minimize_to_tray)
         self.service_status = False
