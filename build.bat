@@ -12,7 +12,15 @@ set "VERSION_FILE_API=version_files\version_api_info.txt"
 set "VERSION_FILE_VIEW=version_files\version_view_info.txt"
 
 :: Ensure version_files directory exists
-if not exist "version_files" mkdir "version_files"
+if not exist "version_files" (
+    echo Creating version_files directory...
+    mkdir "version_files"
+    if %errorlevel% neq 0 (
+        echo ERROR: Failed to create version_files directory!
+        pause
+        exit /b 1
+    )
+)
 
 :: Main script execution
 call :main
@@ -106,7 +114,7 @@ exit /b %errorlevel%
 
 :generate_version_file
     :: Args: %1=output_file, %2=app_name, %3=exe_name
-    echo Generating version info file %~1...
+    echo Generating version info file at: %~1...
 
     :: Verify the directory path is accessible
     for %%F in ("%~1") do (
@@ -155,4 +163,5 @@ exit /b %errorlevel%
         pause
         exit /b 1
     )
+    echo Successfully created version info file: %~1
     exit /b
