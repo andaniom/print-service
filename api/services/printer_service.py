@@ -70,7 +70,7 @@ def print_pdf(pdf_file: str, page_number: int, printer_label: str):
 
             logging.info(f"Executing command: {command}")
 
-            result = subprocess.run(command, capture_output=True, text=True, creationflags=subprocess.CREATE_NO_WINDOW)
+            result = subprocess.run(command, capture_output=True, text=True, check=True)
             if result.returncode == 0:
                 logging.info(f"Print successful: {result.stdout}")
             elif result.returncode == 1:
