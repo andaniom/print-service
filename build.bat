@@ -21,30 +21,10 @@ call :install_dependencies
 call :generate_version_file "%VERSION_FILE_API%" "ecal-printer-api" "ecal-printer-api.exe"
 call :generate_version_file "%VERSION_FILE_VIEW%" "%APP_NAME%" "%APP_NAME%.exe"
 
-:: Build the API with PyInstaller
-echo Building the application API with PyInstaller...
-pyinstaller --onefile -F api/api.py --clean --noconsole --name "ecal-printer-api" --version-file "%VERSION_FILE_API%"
-if %errorlevel% neq 0 (
-    echo API build failed!
-    pause
-    exit /b %errorlevel%
-)
+:: Build executables with PyInstaller
+call :build_exe "api/api.py" "ecal-printer-api" "%VERSION_FILE_API%"
+call :build_exe "main.py" "%APP_NAME%" "%VERSION_FILE_VIEW%" "--add-data dist/ecal-printer-api.exe:. --add-data view:view --add-data app.ico:. --icon app.ico"
 
-:: Build the View with PyInstaller
-echo Building the application view with PyInstaller...
-pyinstaller --onefile ^
---add-data "dist/ecal-printer-api.exe:." ^
---add-data "view:view" ^
---add-data "app.ico:." ^
---icon "app.ico" --noconsole ^
---name "%APP_NAME%" ^
---version-file "%VERSION_FILE%" ^
-main.py
-if %errorlevel% neq 0 (
-    echo View build failed!
-    pause
-    exit /b %errorlevel%
-)
 :: Verify Inno Setup exists
 if not exist "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" (
     echo Inno Setup not found! Please install it to proceed.
