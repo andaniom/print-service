@@ -22,8 +22,8 @@ call :clean_builds
 call :install_dependencies
 
 :: Build executables with PyInstaller
-call :build_exe "api/api.py" "ecal-printer-api" "%VERSION_FILE_API%"
-call :build_exe "main.py" "%APP_NAME%" "%VERSION_FILE_VIEW%" "--add-data dist/ecal-printer-api.exe:. --add-data view:view --add-data app.ico:. --icon app.ico"
+call :build_exe "api/api.py" "ecal-printer-api"
+call :build_exe "main.py" "%APP_NAME%" "--add-data dist/ecal-printer-api.exe:. --add-data view:view --add-data app.ico:. --icon app.ico"
 
 :: Verify Inno Setup exists
 if not exist "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" (
@@ -116,7 +116,7 @@ for %%F in ("%~1") do (
 ::if not exist "%~1" (
 ::    echo ERROR: Failed to create version info file: %~1
 ::    pause
-""    exit /b 1
+::    exit /b 1
 ::)
 exit /b
 
