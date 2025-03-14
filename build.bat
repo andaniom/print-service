@@ -70,6 +70,17 @@ exit /b
 :generate_version_file
 :: Args: %1=output_file, %2=app_name, %3=exe_name
 echo Generating version info file %~1...
+
+:: Verify the directory path is accessible
+for %%F in ("%~1") do (
+    if not exist "%%~dpF" (
+        echo ERROR: Directory %%~dpF does not exist!
+        pause
+        exit /b 1
+    )
+)
+
+:: Write the version info file
 (
     echo # UTF-8 version resource file
     echo VSVersionInfo(
@@ -100,6 +111,8 @@ echo Generating version info file %~1...
     echo     ]
     echo )
 ) > "%~1"
+
+:: Verify the file was created
 if not exist "%~1" (
     echo ERROR: Failed to create version info file: %~1
     pause
