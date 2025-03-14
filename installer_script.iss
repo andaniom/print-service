@@ -2,7 +2,7 @@
 AppPublisher=Ecalyptus
 AppPublisherURL=http://www.ecalyptus.healthcare
 AppName=Ecalyptus Printer Manager
-AppVersion=1.0
+AppVersion=1.0.1
 DefaultDirName={pf}\Ecalyptus Printer Manager
 DefaultGroupName=Ecalyptus Printer Manager
 OutputDir=.
