@@ -8,8 +8,11 @@ set "APP_VERSION=1.0.1"
 set "DIST_PATH=dist"
 set "BUILD_PATH=build"
 set "INSTALLER_SCRIPT=installer_script.iss"
-set "VERSION_FILE_API=version_api_info.txt"
-set "VERSION_FILE_VIEW=version_view_info.txt"
+set "VERSION_FILE_API=version_files\version_api_info.txt"
+set "VERSION_FILE_VIEW=version_files\version_view_info.txt"
+
+:: Ensure version_files directory exists
+if not exist "version_files" mkdir "version_files"
 
 :: Main script execution
 call :main
