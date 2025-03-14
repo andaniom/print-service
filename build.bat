@@ -103,8 +103,8 @@ if %errorlevel% neq 0 (
 :: Build the View with PyInstaller
 echo Building the application view with PyInstaller...
 pyinstaller --onefile ^
---add-data "dist/ecal-printer-api.exe;." ^
---add-data "view;view" ^
+--add-data "dist/ecal-printer-api.exe:." ^
+--add-data "view:view" ^
 --add-data "app.ico;." ^
 --icon "app.ico" --noconsole ^
 --name "%APP_NAME%" ^
