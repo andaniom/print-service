@@ -1,9 +1,8 @@
-import os
 import threading
 from queue import Queue
 
 from api.logger import logger
-from api.services.printer_service import print_pdf
+from api.services.printer_service import print_file
 
 
 class PrintJobQueue:
@@ -12,28 +11,27 @@ class PrintJobQueue:
         self.worker_thread = threading.Thread(target=self.worker, daemon=True)
 
     def process_queue_item(self, item):
-        pdf_file, job_type, data = item
-        if not pdf_file:
+        file, job_type, data = item
+        if not file:
             return
         try:
             if job_type == "print":
-                logger.info(f"Processing print job for {pdf_file} with key {data}")
-                self._print_pdf(pdf_file, 1, data)
+                logger.info(f"Processing print job for {file} with key {data}")
+                self._print(file, 1, data)
             elif job_type == "eticket":
-                logger.info(f"Processing e-ticket print job for {pdf_file} with metadata {data}")
+                logger.info(f"Processing e-ticket print job for {file} with metadata {data}")
                 for entry in data['data']:
-                    self._print_pdf(pdf_file, entry['page'], entry['printer'])
+                    self._print(file, entry['page'], entry['printer'])
+            elif job_type == "print-pk":
+                logger.info(f"Processing print job for {file} with key {data}")
+                self._print(file, 1, data)
         except Exception as e:
-            logger.error(f"Failed to print {pdf_file}: {e}")
+            logger.error(f"Failed to print {file}: {e}")
         finally:
-            logger.info(f"Finished processing {pdf_file}")
-            try:
-                os.remove(pdf_file)
-            except OSError as e:
-                logger.error(f"Failed to delete {pdf_file}: {e}")
+            logger.info(f"Finished processing {file}")
 
-    def _print_pdf(self, pdf_file, page_number, printer_label):
-        print_pdf(pdf_file, page_number, printer_label)
+    def _print(self, file, page_number, printer_label):
+        print_file(file, page_number, printer_label)
 
     def worker(self):
         while True:
@@ -50,13 +48,17 @@ class PrintJobQueue:
         logger.info("Initializing workers...")
         self.worker_thread.start()
 
-    def enqueue_print_job(self, pdf_file, key):
-        self.queue.put((pdf_file, "print", key))
-        logger.info(f"Added job to print queue: {pdf_file}")
+    def enqueue_print_job(self, file, key):
+        self.queue.put((file, "print", key))
+        logger.info(f"Added job to print queue: {file}")
 
-    def enqueue_eticket_job(self, pdf_file, metadata_json):
-        self.queue.put((pdf_file, "eticket", metadata_json))
-        logger.info(f"Added job to e-ticket queue: {pdf_file}")
+    def enqueue_eticket_job(self, file, metadata_json):
+        self.queue.put((file, "eticket", metadata_json))
+        logger.info(f"Added job to e-ticket queue: {file}")
+
+    def enqueue_print_pk_job(self, file, key):
+        self.queue.put((file, "print-pk", key))
+        logger.info(f"Added job to pk queue: {file}")
 
     def get_queue_status(self):
         return {
@@ -78,12 +80,15 @@ def initialize_workers():
     print_job_queue.start()
 
 
-def enqueue_print_job(pdf_file, key):
-    print_job_queue.enqueue_print_job(pdf_file, key)
+def enqueue_print_job(file, key):
+    print_job_queue.enqueue_print_job(file, key)
 
 
-def enqueue_eticket_job(pdf_file, metadata_json):
-    print_job_queue.enqueue_eticket_job(pdf_file, metadata_json)
+def enqueue_eticket_job(file, metadata_json):
+    print_job_queue.enqueue_eticket_job(file, metadata_json)
+
+def enqueue_print_pk_job(file, key):
+    print_job_queue.enqueue_print_pk_job(file, key)
 
 
 def get_queue_status():

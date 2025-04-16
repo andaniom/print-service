@@ -5,20 +5,7 @@ from pathlib import Path
 
 from api.repo.mapping_printer import get_mapping_printer_by_label
 
-def print_pdf(pdf_file: str, page_number: int, printer_label: str):
-    """
-    Prints a PDF file using PDFtoPrinter (print.exe) or 'lp' command, depending on the OS.
-
-    Args:
-        pdf_file (str): Path to the PDF file.
-        page_number (int): The page number to print.
-        printer_label (str): The label of the target printer.
-
-    Raises:
-        FileNotFoundError: If the PDF file does not exist.
-        ValueError: If the page number is invalid.
-        Exception: For unsupported OS or other subprocess-related issues.
-    """
+def print_file(file: str, page_number: int, printer_label: str):
     # Get printer mapping by label
     mapping = get_mapping_printer_by_label(printer_label)
     if mapping is None:
@@ -26,11 +13,12 @@ def print_pdf(pdf_file: str, page_number: int, printer_label: str):
         return
     printer_name = mapping[1]
 
-    # Validate PDF file
-    pdf_path = Path(pdf_file)
-    if not pdf_path.exists():
-        raise FileNotFoundError(f"The file '{pdf_file}' does not exist.")
+    # Validate file
+    path = Path(file)
+    if not path.exists():
+        raise FileNotFoundError(f"The file '{file}' does not exist.")
 
+    print(path)
     # Validate page number
     if not isinstance(page_number, int) or page_number < 1:
         raise ValueError("Page number must be a positive integer.")
@@ -42,14 +30,14 @@ def print_pdf(pdf_file: str, page_number: int, printer_label: str):
                 "lp",
                 "-o", f"page-ranges={page_number}",
                 "-d", printer_name,
-                str(pdf_path)
+                str(path)
             ]
+            print (command)
             logging.debug(f"Executing command: {' '.join(command)}")
             subprocess.run(command, check=True)
         except subprocess.SubprocessError as e:
             raise Exception(f"An error occurred while printing on Linux/Mac: {e}")
 
-    # Windows printing using PDFtoPrinter (print.exe)
     elif os.name == 'nt':
         try:
             logging.info("Using Windows printing method.")
@@ -57,7 +45,7 @@ def print_pdf(pdf_file: str, page_number: int, printer_label: str):
             # logging.debug(f"Executable path: {exec_path}")
             #
             # # command: print specific pages to the printer
-            # command = f'"{exec_path}" "{pdf_file}" "{printer_name}" pages={page_number} /s'
+            # command = f'"{exec_path}" "{file}" "{printer_name}" pages={page_number} /s'
 
             gs_print_path = get_resource_path("GSPRINT\\gsprint.exe")
             gs_path = get_resource_path("GHOSTSCRIPT\\gswin32c.exe")
@@ -65,9 +53,10 @@ def print_pdf(pdf_file: str, page_number: int, printer_label: str):
 
             page_range_options = f"-from {page_number} -to {page_number}"
 
-            # Construct the command to print the PDF
-            command = f'"{gs_print_path}" -ghostscript "{gs_path}" -printer "{printer_name}" {page_range_options} -quiet "{pdf_file}"'
+            # Construct the command to print the
+            command = f'"{gs_print_path}" -ghostscript "{gs_path}" -printer "{printer_name}" {page_range_options} -quiet "{str(path)}"'
 
+            print(command)
             logging.info(f"Executing command: {command}")
 
             result = subprocess.run(command, capture_output=True, text=True, creationflags=subprocess.CREATE_NO_WINDOW)
