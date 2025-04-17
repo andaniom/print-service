@@ -77,7 +77,109 @@ class PrintPKRequest(BaseModel):
 
 
 @app.post("/print-pk")
-async def add_to_queue_pk(request: Request, print_request: Optional[PrintPKRequest] = None):
+async def add_to_queue_lab(request: Request, print_request: Optional[PrintPKRequest] = None):
+    try:
+        if print_request is None:
+            body = await request.body()
+            logger.info(f"Raw request body: {body.decode()}")
+            raise HTTPException(status_code=400, detail="Invalid JSON payload")
+
+        # Log the received data
+        logger.info(f"Received print request: {print_request}")
+
+        # Validate the request
+        if not print_request.code or not print_request.data:
+            raise HTTPException(status_code=400, detail="Missing code or data in request")
+
+        if print_request.data.type.lower() != "zpl":
+            raise HTTPException(status_code=400, detail="Only ZPL type is supported")
+
+        if print_request.key is None:
+            print_request.key = print_request.data.type
+
+        # Save the file
+        for i, code in enumerate(print_request.code):
+            timestamp = int(round(time.time() * 1000))
+            filename = f"{print_request.key}_{timestamp}_{i}.{print_request.data.type}"
+            file_path = save_file_from_text(code, filename)
+            enqueue_print_pk_job(file_path, print_request.key)
+
+        return JSONResponse(content={"message": "Success"})
+
+    except Exception as e:
+        logger.error(f"Error processing request: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/print-radiology")
+async def add_to_queue_radiology(request: Request, print_request: Optional[PrintPKRequest] = None):
+    try:
+        if print_request is None:
+            body = await request.body()
+            logger.info(f"Raw request body: {body.decode()}")
+            raise HTTPException(status_code=400, detail="Invalid JSON payload")
+
+        # Log the received data
+        logger.info(f"Received print request: {print_request}")
+
+        # Validate the request
+        if not print_request.code or not print_request.data:
+            raise HTTPException(status_code=400, detail="Missing code or data in request")
+
+        if print_request.data.type.lower() != "zpl":
+            raise HTTPException(status_code=400, detail="Only ZPL type is supported")
+
+        if print_request.key is None:
+            print_request.key = print_request.data.type
+
+        # Save the file
+        for i, code in enumerate(print_request.code):
+            timestamp = int(round(time.time() * 1000))
+            filename = f"{print_request.key}_{timestamp}_{i}.{print_request.data.type}"
+            file_path = save_file_from_text(code, filename)
+            enqueue_print_pk_job(file_path, print_request.key)
+
+        return JSONResponse(content={"message": "Success"})
+
+    except Exception as e:
+        logger.error(f"Error processing request: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/print-radiologi-multiple")
+async def add_to_queue_radiology_multi(request: Request, print_request: Optional[PrintPKRequest] = None):
+    try:
+        if print_request is None:
+            body = await request.body()
+            logger.info(f"Raw request body: {body.decode()}")
+            raise HTTPException(status_code=400, detail="Invalid JSON payload")
+
+        # Log the received data
+        logger.info(f"Received print request: {print_request}")
+
+        # Validate the request
+        if not print_request.code or not print_request.data:
+            raise HTTPException(status_code=400, detail="Missing code or data in request")
+
+        if print_request.data.type.lower() != "zpl":
+            raise HTTPException(status_code=400, detail="Only ZPL type is supported")
+
+        if print_request.key is None:
+            print_request.key = print_request.data.type
+
+        # Save the file
+        for i, code in enumerate(print_request.code):
+            timestamp = int(round(time.time() * 1000))
+            filename = f"{print_request.key}_{timestamp}_{i}.{print_request.data.type}"
+            file_path = save_file_from_text(code, filename)
+            enqueue_print_pk_job(file_path, print_request.key)
+
+        return JSONResponse(content={"message": "Success"})
+
+    except Exception as e:
+        logger.error(f"Error processing request: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/print-micro")
+async def add_to_queue_micro(request: Request, print_request: Optional[PrintPKRequest] = None):
     try:
         if print_request is None:
             body = await request.body()
