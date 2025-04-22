@@ -5,7 +5,8 @@ from pathlib import Path
 
 from api.repo.mapping_printer import get_mapping_printer_by_label
 
-def print_file(file: str, page_number: int, printer_label: str):
+
+def print_pdf_file(file: str, page_number: int, printer_label: str):
     # Get printer mapping by label
     mapping = get_mapping_printer_by_label(printer_label)
     if mapping is None:
@@ -32,7 +33,7 @@ def print_file(file: str, page_number: int, printer_label: str):
                 "-d", printer_name,
                 str(path)
             ]
-            print (command)
+            print(command)
             logging.debug(f"Executing command: {' '.join(command)}")
             subprocess.run(command, check=True)
         except subprocess.SubprocessError as e:
@@ -77,6 +78,29 @@ def print_file(file: str, page_number: int, printer_label: str):
 
     else:
         raise Exception("Unsupported operating system")
+
+
+def print_zpl_file(file: str, printer_label: str):
+    # Get printer mapping by label
+    mapping = get_mapping_printer_by_label(printer_label)
+    if mapping is None:
+        logging.error(f"Printer label '{printer_label}' not found. Skipping print job.")
+        return
+    printer_name = mapping[1]
+
+    # Validate file
+    path = Path(file)
+    if not path.exists():
+        raise FileNotFoundError(f"The file '{file}' does not exist.")
+
+    if "//" not in printer_name:
+        printer_name = f"//localhost/{printer_name}"
+
+    try:
+        command = f'copy "{str(path)} "{printer_name}"'
+        subprocess.run(command, check=True)
+    except subprocess.SubprocessError as e:
+        raise Exception(f"An error occurred while printing on Linux/Mac: {e}")
 
 
 def get_resource_path(relative_path: str) -> str:

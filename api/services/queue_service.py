@@ -2,7 +2,7 @@ import threading
 from queue import Queue
 
 from api.logger import logger
-from api.services.printer_service import print_file
+from api.services.printer_service import print_pdf_file, print_zpl_file
 
 
 class PrintJobQueue:
@@ -31,7 +31,16 @@ class PrintJobQueue:
             logger.info(f"Finished processing {file}")
 
     def _print(self, file, page_number, printer_label):
-        print_file(file, page_number, printer_label)
+        if file is None:
+            return
+        if file.endswith('.zpl'):
+            print_zpl_file(file, printer_label)
+            return
+        elif file.endswith('.pdf'):
+            print_pdf_file(file, page_number, printer_label)
+            return
+        else:
+            logger.error(f"Unsupported file type: {file}")
 
     def worker(self):
         while True:
