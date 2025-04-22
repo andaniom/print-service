@@ -5,42 +5,44 @@ from api.logger import logger
 from api.services.printer_service import print_pdf_file, print_zpl_file
 
 
+def _print(file, page_number, printer_label):
+    if file is None:
+        return
+    if file.endswith('.zpl'):
+        print_zpl_file(file, printer_label)
+        return
+    elif file.endswith('.pdf'):
+        print_pdf_file(file, page_number, printer_label)
+        return
+    else:
+        logger.error(f"Unsupported file type: {file}")
+
+
+def process_queue_item(item):
+    file, job_type, data = item
+    if not file:
+        return
+    try:
+        if job_type == "print":
+            logger.info(f"Processing print job for {file} with key {data}")
+            _print(file, 1, data)
+        elif job_type == "eticket":
+            logger.info(f"Processing e-ticket print job for {file} with metadata {data}")
+            for entry in data['data']:
+                _print(file, entry['page'], entry['printer'])
+        elif job_type == "print-pk":
+            logger.info(f"Processing print job for {file} with key {data}")
+            _print(file, 1, data)
+    except Exception as e:
+        logger.error(f"Failed to print {file}: {e}")
+    finally:
+        logger.info(f"Finished processing {file}")
+
+
 class PrintJobQueue:
     def __init__(self, maxsize=2000):
         self.queue = Queue(maxsize=maxsize)
         self.worker_thread = threading.Thread(target=self.worker, daemon=True)
-
-    def process_queue_item(self, item):
-        file, job_type, data = item
-        if not file:
-            return
-        try:
-            if job_type == "print":
-                logger.info(f"Processing print job for {file} with key {data}")
-                self._print(file, 1, data)
-            elif job_type == "eticket":
-                logger.info(f"Processing e-ticket print job for {file} with metadata {data}")
-                for entry in data['data']:
-                    self._print(file, entry['page'], entry['printer'])
-            elif job_type == "print-pk":
-                logger.info(f"Processing print job for {file} with key {data}")
-                self._print(file, 1, data)
-        except Exception as e:
-            logger.error(f"Failed to print {file}: {e}")
-        finally:
-            logger.info(f"Finished processing {file}")
-
-    def _print(self, file, page_number, printer_label):
-        if file is None:
-            return
-        if file.endswith('.zpl'):
-            print_zpl_file(file, printer_label)
-            return
-        elif file.endswith('.pdf'):
-            print_pdf_file(file, page_number, printer_label)
-            return
-        else:
-            logger.error(f"Unsupported file type: {file}")
 
     def worker(self):
         while True:
@@ -49,7 +51,7 @@ class PrintJobQueue:
                 logger.info("Worker received shutdown signal.")
                 break
             try:
-                self.process_queue_item(item)
+                process_queue_item(item)
             finally:
                 self.queue.task_done()
 
